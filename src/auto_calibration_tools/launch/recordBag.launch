@@ -1,0 +1,15 @@
+<launch>
+  <!-- Specify the topics you want to record -->
+  <arg name="topics" default="/scan /tf /theta_camera/image_raw"/>
+
+  <!-- Specify the directory where you want to save the bag file -->
+  <arg name="bag_dir" default="$(find auto_calibration_tools)/bags"/>
+
+  <!-- Specify the custom bag file name -->
+  <arg name="bag_filename" default="hospital"/>
+
+  <!-- Launch the rosbag record node -->
+  <node name="rosbag_record" pkg="rosbag" type="record" output="screen" args="--output-name=$(arg bag_dir)/$(arg bag_filename) $(arg topics)">
+  </node>
+
+</launch>
