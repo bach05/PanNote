@@ -120,13 +120,18 @@ def predRANSAC(ransac_params, rho_laser, theta_laser):
 if __name__ == '__main__':
 
     # Specify the path of the calibration data
-    file_path = "cameraLaser_pointsUHD_pano.pkl"
+    file_path = "cameraLaser_pointsUHD_static_indoor.pkl"
 
     # Open the file in binary read mode
     with open(file_path, 'rb') as file:
         # Load the dictionary from the pickle file
         data = pickle.load(file)
 
+    outliers = [
+        "image_83.png", "image_94.png", "image_96.png", "image_97.png",
+        "image_98.png", "image_99.png", "image_108.png", "image_109.png",
+        "image_112.png", "image_125.png", "image_126.png", "image_130.png",
+        ]
 
     parameters = []
     image_points = []
@@ -233,13 +238,19 @@ if __name__ == '__main__':
         name = names[i]
         im_name = os.path.basename(name)
 
-        if not (err < 600):
+        # if not (err < 600):
+        #
+        #     print(f"******** Wrong detection  in {im_name} *******+")
+        #
+        #     # Use regular expression to find the ID and convert it to an integer
+        #     match = re.search(r'image_(\d+)\.png', im_name)
+        #     wrong_detections[i] = True
+
+        if im_name in outliers:
 
             print(f"******** Wrong detection  in {im_name} *******+")
-
             # Use regular expression to find the ID and convert it to an integer
             match = re.search(r'image_(\d+)\.png', im_name)
-
             wrong_detections[i] = True
 
 
@@ -251,7 +262,7 @@ if __name__ == '__main__':
         # fig = plt.figure(im_name, figsize=(18, 12))
         #
         # im_root = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration/"
-        # img_name = os.path.join(im_root, "images_UHD_indoor", im_name)
+        # img_name = os.path.join(im_root, "imagesUHD_board_static_i", im_name)
         # pano_img = cv2.cvtColor(cv2.imread(img_name), cv2.COLOR_BGR2RGB)
         #
         # #pano_img = undistort(pano_img, K , D)
@@ -263,7 +274,7 @@ if __name__ == '__main__':
         #
         # plt.subplot(2,1,2)
         # im_root = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration/pano_process/"
-        # img_name = os.path.join(im_root, "log_imgs", im_name)
+        # img_name = os.path.join(im_root, "indoor_static", im_name)
         # pano_img = cv2.cvtColor(cv2.imread(img_name), cv2.COLOR_BGR2RGB)
         # plt.imshow(pano_img)
         #
@@ -293,10 +304,10 @@ if __name__ == '__main__':
     y = laser_point_polars[:, 1]
 
     z = preds_thetaI
-    ax.scatter(x, y, z, c='red', marker='o', label="pred")
+    ax.scatter(x, y, z, c='blue', marker='x', label="pred")
 
     z = image_points[:,0]
-    ax.scatter(x, y, z, c='blue', marker='x', label="gt")
+    ax.scatter(x, y, z, c='red', marker='o', label="gt")
 
     # Set labels for the axes
     ax.set_xlabel('rho')
@@ -359,13 +370,13 @@ if __name__ == '__main__':
     fig = plt.figure("2D")
 
     ax = fig.add_subplot(211)
-    x = laser_point_polars[~wrong_detections[:,0], 1]
+    x = laser_point_polars[~wrong_detections[:,0], 0]
     ax.scatter(x, avg_err, c="orange", marker='+', label="gt")
     ax.set_xlabel('rho laser')
     ax.set_ylabel('error')
 
     ax = fig.add_subplot(212)
-    x = laser_point_polars[~wrong_detections[:,0], 0]
+    x = laser_point_polars[~wrong_detections[:,0], 1]
     ax.scatter(x, avg_err, c="orange", marker='+', label="gt")
     ax.set_xlabel('theta laser')
     ax.set_ylabel('error')

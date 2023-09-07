@@ -169,9 +169,24 @@ The scripts read images from `backgrounds_UHD/` folder and `target_ball.png` to 
 
 ```commandline
 cd AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration
-python3 processCalibrationData.py
+python3 processCalibrationDataPano.py
 ```
-This step extracts features from each image and laser scan couple. The results are saved into `cameraLaser_points.pkl`.  The data are read from `images_UHD_indoor/` folder.
+This step extracts features from each image and laser scan couple. The results are saved into `cameraLaser_pointsUHD_pano_indoor2.pkl`.  The data are read from `images_UHD_indoor/` folder.
+
+```commandline
+cd AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration
+python3 calibrateLaser2CameraPolar.py
+```
+is used to calibrate the panoramic image with the laser. The final output is a dictionary like: 
+
+```python
+    results = {
+        "ransac":R_params
+    }
+
+```
+saved into `laser2camera_polar_map.pkl`. You can use it to feed the function `predRANSAC(ransac_params, rho_laser, theta_laser)` to map laser points into the panoramic image. 
+
 
 ### Run calibration with the ball
 

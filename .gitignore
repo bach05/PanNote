@@ -81,5 +81,9 @@ src/auto_calibration_tools/scripts/camera_laser_calibration/images_orbbec/
 src/auto_calibration_tools/scripts/camera_laser_calibration/images_orbbec_ball/
 src/auto_calibration_tools/scripts/camera_laser_calibration/pano_process/
 
+src/auto_calibration_tools/scripts/camera_laser_calibration/imagesUHD_ball_static_200i/
+src/auto_calibration_tools/scripts/camera_laser_calibration/imagesUHD_ball_static_i/
+src/auto_calibration_tools/scripts/camera_laser_calibration/imagesUHD_board_static_i/
+
 
 .ignore.swp

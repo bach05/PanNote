@@ -751,7 +751,7 @@ def main():
 
     verbose = True
 
-    image_folder = './images_UHD_indoor'
+    image_folder = './imagesUHD_board_static_i'
     csv_file_path = os.path.join(image_folder,'scan.csv')
 
     plotter = Plotter((1,2))
@@ -820,7 +820,7 @@ def main():
                     if verbose:
                         #plotter.show()
                         plotter.zoom_around_point(A[0], A[1], 4.0)
-                        plotter.save("pano_process", os.path.splitext(bag_name)[0], subfolder="indoor")
+                        plotter.save("pano_process", os.path.splitext(bag_name)[0], subfolder="indoor_static")
 
                     #DATA ASSOCIATION AND SAVE: left image point = C, right image points = B
                     data = ((C, left), (B, right), image_filename, (Cp, left), (Bp, right) )
@@ -831,7 +831,7 @@ def main():
             if i%50 == 0:
 
                 # Specify the file path where you want to save the dictionary
-                file_path = "cameraLaser_pointsUHD_pano_indoor2.pkl"
+                file_path = "cameraLaser_pointsUHD_static_indoor.pkl"
                 # save dictionary to pkl file
                 with open(file_path, 'wb') as fp:
                     pickle.dump(good_points, fp)
@@ -844,7 +844,7 @@ def main():
     print(f"Total tuples detected: {len(good_points)}")
 
     # Specify the file path where you want to save the dictionary
-    file_path = "cameraLaser_pointsUHD_pano_indoor2.pkl"
+    file_path = "cameraLaser_pointsUHD_static_indoor.pkl"
 
     # save dictionary to pkl file
     with open(file_path, 'wb') as fp:

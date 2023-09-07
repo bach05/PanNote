@@ -17,7 +17,7 @@ class DataSaverNode:
         # Retrieve parameters
         SAVE_ROOT = rospy.get_param("~SAVE_ROOT", "./calibration_data_extrinsics/images")
         num_images_to_save = rospy.get_param("~num_images_to_save", 100)
-        save_interval = rospy.get_param("~save_interval", 1)  # Adjust the interval as needed (in seconds)
+        save_interval = rospy.get_param("~save_interval", 4)  # Adjust the interval as needed (in seconds)
 
         if not os.path.exists(SAVE_ROOT):
             os.makedirs(SAVE_ROOT)
@@ -62,6 +62,12 @@ class DataSaverNode:
         print("Data received...")
 
     def save_data(self, event):
+
+        frame_id = self.image_count
+        os.system('spd-say "Starting acquisition of image {}"'.format(frame_id))
+
+        rospy.sleep(2)
+
         if self.image_data is not None and self.scan_data is not None:
             # Perform data processing here if needed
             # For example, you can save the image as an OpenCV image
@@ -82,6 +88,7 @@ class DataSaverNode:
                 writer.writerow([image_filename] + list(self.scan_data.ranges))
 
             rospy.loginfo(f"Data saved to {image_filename} and {self.scan_filename}")
+            os.system('spd-say "Saved"')
 
             if self.image_count > self.max_data:
                 rospy.signal_shutdown("Acquired {} images, stopping...".format(self.image_count))

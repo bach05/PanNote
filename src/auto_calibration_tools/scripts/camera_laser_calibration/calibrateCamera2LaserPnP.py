@@ -121,27 +121,29 @@ SIDE_MAP = {
 def correctU(H, pred_u, x_3d, y_3d):
 
     theta, scale = H
-
     t = rotated_arctan2(x_3d, y_3d, theta) / (np.pi)
-
     correction_u = pred_u + t*scale
 
     return correction_u
 
-def correctU2(H, pred_u, x_3d, y_3d):
+def correctU2(H, x_3d, y_3d):
 
-    theta, scale, a = H
+    theta, scale, offset = H
+    t = rotated_arctan2(x_3d, y_3d, theta) / (np.pi) + offset
+    correction_u = t*scale
 
-    t = rotated_arctan2(x_3d, y_3d, theta) / (np.pi)
-
-
-    correction_u = pred_u + t*scale + a*(x_3d**2 + y_3d**2)
+    #correction_u = rotated_arctan2(x_3d, y_3d, np.pi/2) / (np.pi) + 1.0
 
     return correction_u
 
 def distErr(H, gt_u, pred_u, x_3d, y_3d):
 
-    correct_u = correctU(H, pred_u, x_3d, y_3d)
+    if pred_u is not None:
+        correct_u = correctU(H, pred_u, x_3d, y_3d)
+    else:
+        theta, scale, offset = H
+        t = rotated_arctan2(x_3d, y_3d, theta) / (np.pi) + offset
+        correct_u = t * scale
 
     error = periodicDist(correct_u, gt_u)
 
@@ -220,15 +222,33 @@ def is_function(x, y, z):
     # then z = f(x, y) is a function
     return unique_xy.shape[0] == xyz.shape[0]
 
-def projectPoint2Image(laser_point, K, D, T, R, H, z_value):
+# def projectPoint2Image(laser_point, K, D, T, R, H, z_value):
+#
+#     z = np.expand_dims(np.zeros_like(laser_point[:,:,0]) + z_value, axis=-1)
+#     points_3d = np.concatenate([laser_point, z], axis=-1)
+#
+#     predicted, _ = cv2.projectPoints(points_3d[:, :], rvec, tvec, K, D)
+#     predicted = cv2.undistortPoints(predicted, K, D, P=K)
+#
+#     predicted[:, 0, 0] = correctU(H1, pred_u=predicted[:, 0, 0], x_3d=points_3d[0, :, 0], y_3d=points_3d[0, :, 1])
+#
+#     mask = predicted[:, 0, 0] > 3839
+#     predicted[mask,0,0] = predicted[mask, 0, 0] % 3839
+#     mask = predicted[:, 0, 0] < 0
+#     predicted[mask, 0,0] = predicted[mask, 0, 0] + 3840
+#
+#     return predicted
 
-    z = np.expand_dims(np.zeros_like(laser_point[:,:,0]) + z_value, axis=-1)
-    points_3d = np.concatenate([laser_point, z], axis=-1)
 
-    predicted, _ = cv2.projectPoints(points_3d[:, :], rvec, tvec, K, D)
-    predicted = cv2.undistortPoints(predicted, K, D, P=K)
+def projectPoint2Image(laser_point, H):
 
-    predicted[:, 0, 0] = correctU(H1, pred_u=predicted[:, 0, 0], x_3d=points_3d[0, :, 0], y_3d=points_3d[0, :, 1])
+    x_3d, y_3d = laser_point[:,0], laser_point[:,1]
+    predicted = correctU2(H, x_3d, y_3d)
+
+    mask = predicted > 3839
+    predicted[mask] = predicted[mask] % 3839
+    mask = predicted < 0
+    predicted[mask] = predicted[mask] + 3840
 
     return predicted
 
@@ -243,7 +263,7 @@ if __name__ == '__main__':
         camera_calib = pickle.load(file)
 
     # Specify the path of the calibration data
-    file_path = "cameraLaser_pointsUHD_ball_pano_i.pkl"
+    file_path = "cameraLaser_pointsUHD_ball_static_i.pkl"
 
     # Open the file in binary read mode
     with open(file_path, 'rb') as file:
@@ -306,7 +326,6 @@ if __name__ == '__main__':
     #predicted = undistortPoints(predicted, K, D, balance=1.0, dim1=(1920, 3840))
 
     H0 = (np.pi/2, 3840/2)
-
     predicted_H0 = correctU(H0, pred_u=predicted[:, 0, 0], x_3d=points_3d[0,:,0], y_3d=points_3d[0,:,1])
 
     mask = predicted_H0 > 3839
@@ -315,8 +334,6 @@ if __name__ == '__main__':
     predicted_H0[mask] = predicted_H0[mask] + 3840
 
     H0g = (np.pi / 2, 3840 / 2)
-
-
     H1, _ = optimize(H0g, points_2d[0,:,0], predicted[:, 0, 0], points_3d[0,:,0], points_3d[0,:,1])
 
     predicted_H1 = correctU(H1, pred_u=predicted[:, 0, 0], x_3d=points_3d[0,:,0], y_3d=points_3d[0,:,1])
@@ -325,6 +342,17 @@ if __name__ == '__main__':
     predicted_H1[mask] = predicted_H1[mask] % 3839
     mask = predicted_H1 < 0
     predicted_H1[mask] = predicted_H1[mask] + 3840
+
+    #use argtan 2 directly
+    H0g = (np.pi / 2, 3840 / 2, 1.0)
+    H2, _ = optimize(H0g, points_2d[0, :, 0], None, points_3d[0, :, 0], points_3d[0, :, 1])
+
+    pred_H2 = correctU2(H2, points_3d[0, :, 0], points_3d[0, :, 1])
+
+    mask = pred_H2 > 3839
+    pred_H2[mask] = pred_H2[mask] % 3839
+    mask = pred_H2 < 0
+    pred_H2[mask] = pred_H2[mask] + 3840
 
 
     for i, (laser_p, image_p) in enumerate(zip(points_3d[0], points_2d[0])):
@@ -368,11 +396,10 @@ if __name__ == '__main__':
 
     laser_points = points_3d[:, :, :2]
     z_value = np.mean(points_3d[:, :, 2])
-    pred = projectPoint2Image(laser_point=laser_points, K=K, D=D, T=tvec, R=rvec, H=H1, z_value=z_value)[:,0,0]
+    pred = projectPoint2Image(laser_point=laser_points[0],H=H2)
     error = periodicDist(pred,  points_2d[0,:,0])
-    print(f"REPROJECTION ERROR X H1 =  {H1}: {(error.mean())}")
-    #print(f"REPROJECTION ERROR X correction: {(reproj_errors_correction.mean())}")
-    #print(f"REPROJECTION ERROR Y: {np.sqrt(reproj_errors_y.mean())}")
+    print(f"REPROJECTION ERROR X H2 =  {H2}: {(error.mean())}")
+
 
     error = periodicDist(points_2d[0, :, 1], predicted[:, 0, 1], 1920)
     print(f"REPROJECTION ERROR Y: {(error.mean())}")
@@ -388,16 +415,27 @@ if __name__ == '__main__':
     x = points_3d[0, :, 0]
     y = points_3d[0, :, 1]
 
-    z = predicted_H0
-    ax.scatter(x, y, z, c="cyan", marker='x', label="pred H0")
+    #z = predicted_H0
+    # z = predicted[:, 0, 0]
+    # ax.scatter(x, y, z, c="red", marker='x', label="pred")
+    # #ax.plot_trisurf(x, y, z, color="red", alpha=0.2)
+    #
+    # z = predicted_H0
+    # ax.plot(x, y, z, c="cyan", marker='x', label="H0")
+    #
+    # laser_points = points_3d[:,:,:2]
+    # z_value = np.mean(points_3d[:,:,2])
+    # z = projectPoint2Image(laser_point=laser_points, K=K, D=D, T=tvec, R=rvec, H=H1, z_value=z_value)[:,0,0]
+    # ax.scatter(x, y, z, c="blue", marker='x', label="pred H1")
 
-    laser_points = points_3d[:,:,:2]
-    z_value = np.mean(points_3d[:,:,2])
-    z = projectPoint2Image(laser_point=laser_points, K=K, D=D, T=tvec, R=rvec, H=H1, z_value=z_value)[:,0,0]
-    ax.scatter(x, y, z, c="blue", marker='x', label="pred H1")
+    laser_points = points_3d[:, :, :2]
+    z_value = np.mean(points_3d[:, :, 2])
+    z = pred_H2
+    ax.scatter(x, y, z, c="purple", marker='+', label="pred H2")
 
     z = points_2d[0, :, 0]
     ax.scatter(x, y, z, c="orange", marker='o', label="gt")
+    #ax.plot_trisurf(x, y, z, color="orange", alpha=0.2)
 
     # Set labels for the axes
     ax.set_xlabel('x laser')
@@ -408,8 +446,8 @@ if __name__ == '__main__':
 
     fig = plt.figure("2D")
 
-    correct_u = correctU(H1,predicted[:, 0, 0], points_3d[0, :, 0], points_3d[0, :, 1])
-    error = periodicDist(correct_u, points_2d[0, :, 0])
+    pred = projectPoint2Image(laser_point=laser_points[0], H=H2)
+    error = periodicDist(pred, points_2d[0, :, 0])
     ax = fig.add_subplot(211)
     z = points_2d[0, :, 0]
     ax.scatter(x, error, c="orange", marker='+', label="gt")

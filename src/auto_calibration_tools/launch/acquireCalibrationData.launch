@@ -1,7 +1,8 @@
 <launch>
   <!-- Declare parameters as arguments -->
-  <arg name="SAVE_ROOT" default="/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration/imagesUHD_ball_400i"/>
-  <arg name="num_images_to_save" default="400"/>
+  <arg name="SAVE_ROOT" default="/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration/imagesUHD_ball_static_i"/>
+  <arg name="num_images_to_save" default="200"/>
+  <arg name="save_interval" default="4"/>
 
   <!-- Declare the node -->
   <node
@@ -12,6 +13,7 @@
     <!-- Pass parameters to the node using arguments -->
     <param name="SAVE_ROOT" value="$(arg SAVE_ROOT)"/>
     <param name="num_images_to_save" value="$(arg num_images_to_save)"/>
+    <param name="save_interval" value="$(arg save_interval)"/>
   </node>
 </launch>
 
