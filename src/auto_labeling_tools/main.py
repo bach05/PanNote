@@ -35,12 +35,12 @@ def read_scan(path):
 
 if __name__ == "__main__":
 
-    path_bag = "/media/leonardo/Elements/bag/hospital1_static.bag"
-    t_laser = "/scan"
-    t_img = "/theta_camera/image_raw"
-    path_out = "/media/leonardo/Elements/prova"
-    out_path_scans = "/media/leonardo/Elements/prova/img_out"
-    out_path_det = "/media/leonardo/Elements/prova/yolo_out"
+    #path_bag = "/media/leonardo/Elements/bag/hospital1_static.bag"
+    # t_laser = "/scan"
+    # t_img = "/theta_camera/image_raw"
+    path_out = "/media/leonardo/Elements/prova" #read processed bag
+    out_path_scans = "/media/leonardo/Elements/prova/img_out" #visualization
+    out_path_det = "/media/leonardo/Elements/prova/yolo_out" #visualization
 
     laser_spec = {
         'frame_id': "base_link",
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     }
 
     image_spec = {
-        "width" : 3860,
+        "width" : 3840,
     }
 
     path_laser = osp.join(path_out, "laser.csv")
