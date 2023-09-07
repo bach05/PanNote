@@ -85,5 +85,11 @@ src/auto_calibration_tools/scripts/camera_laser_calibration/imagesUHD_ball_stati
 src/auto_calibration_tools/scripts/camera_laser_calibration/imagesUHD_ball_static_i/
 src/auto_calibration_tools/scripts/camera_laser_calibration/imagesUHD_board_static_i/
 
+src/auto_labeling_tools/models/
+
+__pycache__/*
+*/__pycache__
+*.tsv
+*.pyc
 
 .ignore.swp
