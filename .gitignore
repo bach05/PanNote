@@ -95,6 +95,9 @@ src/manual_labelling/models/
 src/manual_labelling/traced_model.pt
 src/manual_labelling/yolov7/
 
+src/auto_calibration_tools/bags/
+src/manual_labelling/sync/
+src/manual_labelling/synch/
 
 __pycache__/*
 */__pycache__
