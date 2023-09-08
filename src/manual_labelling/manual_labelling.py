@@ -1,14 +1,22 @@
 import os
 import pandas as pd
 from PIL import Image
+
+import matplotlib as mpl
+mpl.use('TkAgg')
+
 import matplotlib.pyplot as plt
+
 import numpy as np
 import re
 import pickle
+import cv2
 
 import sys
 sys.path.append('..')
 from auto_calibration_tools.scripts.camera_laser_calibration.calibrateCamera2LaserPnP import projectPoint2Image
+import detect_people
+from matplotlib.backend_bases import MouseButton
 
 # Function to read drspaam_data2.csv
 def read_drspaam_data(file_path):
@@ -33,17 +41,60 @@ class ClickHandler:
         self.read_ax = read_ax
         self.write_ax = write_ax
         self.H = H
+        self.u_left = None
+        self.u_right = None
+        self.points = None
+        self.crop = [0, 0, 0, 0]
+
+
+    def set_pointcloud(self, points):
+        self.points = points
 
     def onclick(self, event):
         if event.inaxes == self.read_ax:
-            x, y = event.xdata, event.ydata
-            print(f"Clicked at pixel coordinates: x={x}, y={y}")
 
-            laser_point = np.array([[x,y]])
-            u = projectPoint2Image(laser_point, self.H)
-            print(f"Predicted u {u}")
+            #leggo click left
+            if event.button is MouseButton.LEFT:
+                x, y = event.xdata, event.ydata
+                print(f"Clicked at pixel coordinates: x={x}, y={y}")
 
-            self.write_ax.axvline(u)
+                laser_point = np.array([[x,y]])
+                self.u_left = projectPoint2Image(laser_point, self.H)
+                print(f"Predicted u left {self.u_left}")
+
+                self.crop[0] = x
+                self.crop[1] = y
+
+                self.write_ax.axvline(self.u_left, c="blue")
+
+            #leggo click right
+            elif event.button is MouseButton.RIGHT:
+
+                #devo aver settato già il primo corner
+                if self.u_left is None:
+                    print("Define the upper left corner before with a LEFT click!")
+
+                else:
+
+                    x, y = event.xdata, event.ydata
+                    print(f"Clicked at pixel coordinates: x={x}, y={y}")
+
+                    laser_point = np.array([[x, y]])
+                    self.u_right = projectPoint2Image(laser_point, self.H)
+                    print(f"Predicted u right {self.u_right}")
+
+                    self.crop[2] = x
+                    self.crop[3] = y
+
+                    #processing del crop nella pointcloud....
+
+                    self.write_ax.axvline(self.u_right, c="red")
+
+                    #reset
+                    self.u_left = None
+                    self.u_right = None
+
+
             plt.show()
 
 
@@ -67,6 +118,11 @@ def main():
 
     # Specify the path of the calibration data
     file_path = "../auto_calibration_tools/scripts/camera_laser_calibration/laser2camera_map.pkl"
+
+    # set yolo
+    yolo_model = detect_people.load_model(weights="models/yolov7.pt")
+
+    mpl.use('TkAgg')
 
     # Open the file in binary read mode
     with open(file_path, 'rb') as file:
@@ -119,18 +175,25 @@ def main():
         # detections = strings_to_tuples(drspaam_data)
         # detections = np.array(detections)
 
+        cv_image = np.array(image)
+        detected, objects_pose = detect_people.detect_person(cv_image, yolo_model)
+
+        for j in range(len(detected)):
+            point1 = detected[j][:2]
+            point2 = detected[j][2:]
+            cv2.rectangle(cv_image, point1, point2, (0, 255, 0), 5)
+
         # Create a 1x2 grid of subplots
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
         ch = ClickHandler(read_ax=ax2, write_ax=ax1, H=H)
 
         # Plot the image in the first subplot
-        ax1.imshow(image)
+        ax1.imshow(cv_image)
         ax1.set_title(f"Image {image_index}")
         ax1.axis('off')  # Turn off axis labels and ticks
 
         # Plot the laser scan data in the second subplot
         ax2.scatter(points[:, 0], points[:, 1], marker="o", color="orange", s=4)
-        # ax2.scatter(detections[:, 0], detections[:, 1], marker="s", color="red", label="dr-spaam")
         ax2.set_title("Laser Scan Data")
         ax2.axis('equal')
         # Plot horizontal x-axis (red line)
@@ -141,7 +204,7 @@ def main():
 
         # Show the plot
         plt.tight_layout()  # Ensure proper spacing between subplots
-        plt.legend()
+        #plt.legend()
         plt.show()
 
         # Now you can work with the image, laser scan data, and dr-spaam data as needed
@@ -149,86 +212,6 @@ def main():
 
         # Close the image
         image.close()
-
-
-
-    for filename in os.listdir(folder_path):
-        if filename.endswith('.png'):
-            image_path = os.path.join(folder_path, filename)
-
-            # Extract image number from filename
-            image_number = int(filename.split('.')[0])
-
-            # Load the image using PIL
-            image = Image.open(image_path)
-
-            # Get the corresponding laser scan data
-            scan_data = scan_df.iloc[image_number].tolist()[0]
-
-            # Split the string by commas and convert each element to float
-            values = [float(val) for val in scan_data.split(',')]
-
-            img_id = values[0]
-            print("Image path: ", image_path)
-            print("image ID: ", img_id)
-
-            # Convert the list of values to a NumPy array
-            ranges = np.array(values)[1:]
-
-            mask = ranges <= laser_spec['range_max']
-
-            # Calculate the angles for each range measurement
-            angles = np.arange(laser_spec['angle_min'], laser_spec['angle_max'], laser_spec['angle_increment'])
-
-            ranges = ranges[mask]
-            angles = angles[mask]
-
-            # Convert polar coordinates to Cartesian coordinates
-            x = np.multiply(ranges, np.cos(angles))
-            y = np.multiply(ranges, np.sin(angles))
-
-            points = np.stack([x, y], axis=1)
-            points_polar = np.stack([ranges, angles], axis=1)
-
-
-            # Get the corresponding dr-spaam data
-            # drspaam_data_file = os.path.join(folder_path, 'drspaam_data2.csv')
-            # drspaam_data = read_drspaam_data(drspaam_data_file)[image_number]
-            #
-            # # Use list comprehension to convert the list of strings to tuples
-            # detections = strings_to_tuples(drspaam_data)
-            # detections = np.array(detections)
-
-            # Create a 1x2 grid of subplots
-            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-            ch = ClickHandler(read_ax=ax2, write_ax=ax1, H=H)
-
-            # Plot the image in the first subplot
-            ax1.imshow(image)
-            ax1.set_title(f"Image {image_number}")
-            ax1.axis('off')  # Turn off axis labels and ticks
-
-            # Plot the laser scan data in the second subplot
-            ax2.scatter(points[:,0], points[:,1], marker="o", color="orange", s=4)
-            #ax2.scatter(detections[:, 0], detections[:, 1], marker="s", color="red", label="dr-spaam")
-            ax2.set_title("Laser Scan Data")
-            ax2.axis('equal')
-            # Plot horizontal x-axis (red line)
-            ax2.grid()
-
-            # Connect the mouse click event to the custom function
-            fig.canvas.mpl_connect('button_press_event', ch.onclick)
-
-            # Show the plot
-            plt.tight_layout()  # Ensure proper spacing between subplots
-            plt.legend()
-            plt.show()
-
-            # Now you can work with the image, laser scan data, and dr-spaam data as needed
-            # For example, you can print them for verification or perform other tasks
-
-            # Close the image
-            image.close()
 
 
 

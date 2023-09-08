@@ -250,6 +250,15 @@ def projectPoint2Image(laser_point, H):
 
     return predicted
 
+def projectImage2Point(image_point, H):
+
+    theta, scale, offset = H
+
+    x_laser = np.sin((image_point/scale - offset)*np.pi)
+    y_laser = np.cos((image_point/scale - offset)*np.pi)
+
+    return np.vstack([x_laser, y_laser]).T
+
 
 if __name__ == '__main__':
 
@@ -396,9 +405,9 @@ if __name__ == '__main__':
     error = periodicDist(pred,  points_2d[0,:,0])
     print(f"REPROJECTION ERROR X H2 =  {H2}: {(error.mean())}")
 
-
-    error = periodicDist(points_2d[0, :, 1], predicted[:, 0, 1], 1920)
-    print(f"REPROJECTION ERROR Y: {(error.mean())}")
+    reprojected_laser = projectImage2Point(pred, H2)
+    error = np.linalg.norm(reprojected_laser - points_3d[0,:,:2], axis=1).mean()
+    print(f"REPROJECTION ERROR LASER: {(error.mean())}")
 
     rho = np.linalg.norm(points_3d[0, :, :2], axis=1)
     theta = np.arctan2(points_3d[0, :, 1], points_3d[0, :, 0])
@@ -440,7 +449,7 @@ if __name__ == '__main__':
 
     plt.legend()
 
-    fig = plt.figure("2D")
+    fig = plt.figure("ERROR IMAGE")
 
     pred = projectPoint2Image(laser_point=laser_points[0], H=H2)
     error = periodicDist(pred, points_2d[0, :, 0])
@@ -459,6 +468,17 @@ if __name__ == '__main__':
     result = is_function(x,y,z)
     print("Is z = f(x, y) a function?", result)
 
+    fig = plt.figure("ERROR LASER")
+
+    pred = projectPoint2Image(laser_point=laser_points[0], H=H2)
+    reprojected_laser = projectImage2Point(pred, H2)
+    ax = fig.add_subplot(111)
+    ax.scatter(points_3d[0,:,0], points_3d[0,:,1], c="orange", marker='+', label="gt")
+    ax.scatter(reprojected_laser[:,0], reprojected_laser[:,1], c="red", marker='+', label="reproj")
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+
+    plt.legend()
     plt.show()
 
     results = {

@@ -91,6 +91,11 @@ src/auto_labeling_tools/models/
 src/manual_labelling/hospital3_static/
 src/manual_labelling/lab_indoor_1/
 
+src/manual_labelling/models/
+src/manual_labelling/traced_model.pt
+src/manual_labelling/yolov7/
+
+
 __pycache__/*
 */__pycache__
 *.tsv
