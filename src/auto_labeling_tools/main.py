@@ -81,7 +81,6 @@ if __name__ == "__main__":
             plot_scans(points, people, out_path_scans, str(id).zfill(4), labels)
             plot_scans(points, cluster_centroids, out_path_scans, str(id+10000).zfill(4))
 
-
         # read panoramic
         img1 = cv2.imread(img_path)
         cv2_image_rgb = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
@@ -98,6 +97,7 @@ if __name__ == "__main__":
             if face in ["front", "back", "left", "right"]:
 
                 face_det = []
+
                 # detect
                 cv_image = np.array(side_img)
                 detected, objects_pose = detect_people.detect_person(cv_image, yolo_model)
@@ -113,7 +113,6 @@ if __name__ == "__main__":
                         rep_detections.append([pan_point_1[0], pan_point_1[1], pan_point_2[0], pan_point_2[1]])
 
                         rep_image = cv2.rectangle(rep_image, pan_point_1, pan_point_2, (0, 255, 0), 5)
-
 
                 # plot side
                 plot_detection(cv_image, detected, face+str(id).zfill(4), out_path_det+"/"+face+"_")
