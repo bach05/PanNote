@@ -10,8 +10,6 @@ import matplotlib.pyplot as plt
 from scipy.stats import linregress
 from scipy.linalg import svd
 import random
-from MLP import MLPTrainer
-from cube_projection_LB import CubeProjection
 
 from matplotlib.collections import LineCollection
 
@@ -274,8 +272,6 @@ if __name__ == '__main__':
     points_3d = []
     names = []
 
-    cube = CubeProjection(None, None)
-
     print("*****Found {} tuples".format(len(data)))
 
     for points in data:
@@ -466,12 +462,7 @@ if __name__ == '__main__':
     plt.show()
 
     results = {
-        "K":K,
-        "D":D,
-        "T":tvec,
-        "R":rvec,
-        "H":H1,
-        "z_value":z_value
+        "H2":H2
     }
 
     # Specify the file path where you want to save the dictionary

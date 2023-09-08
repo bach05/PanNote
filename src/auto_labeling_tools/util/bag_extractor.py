@@ -5,6 +5,7 @@ import rosbag
 import csv
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+from tqdm import tqdm
 
 
 class Bag_manager:
@@ -13,8 +14,17 @@ class Bag_manager:
         self.img_topic = img_topic
         self.laser_topic = laser_topic
 
-    def extract_bag(self, out_path):
+    def extract_bag(self, out_path, step_size = 7):
         bridge = CvBridge()
+
+        if not os.path.exists(out_path):
+            # If it doesn't exist, create it
+            os.makedirs(out_path)
+            os.makedirs(os.path.join(out_path,"img"))
+            print(f"Folder '{out_path}' created successfully.")
+        else:
+            print(f"Folder '{out_path}' already exists.")
+
         csvfile = osp.join(out_path, "laser.csv")
         with open(csvfile, mode='w', newline='') as csvfile:
 
@@ -28,9 +38,9 @@ class Bag_manager:
 
 
                 # Iterate through messages in the bag
-                for topic, msg, t in bag.read_messages(topics=[self.laser_topic, self.img_topic]):
+                for topic, msg, t in tqdm(bag.read_messages(topics=[self.laser_topic, self.img_topic])):
                     image_data = None
-                    print(t)
+                    #print(t)
                     if topic == '/scan':
                         # Assuming msg.ranges contains the laser range data
                         laser_ranges = msg.ranges
@@ -47,7 +57,7 @@ class Bag_manager:
                     # Save the image if available
                     if image_data is not None:
                         # Write data to CSV row
-                        if im % 7 == 0:
+                        if im % step_size == 0:
                             image_filename = str(im).zfill(4)+ '.png'
                             image_path = os.path.join(out_path, "img", image_filename)
                             cv2.imwrite(image_path, image_data)
