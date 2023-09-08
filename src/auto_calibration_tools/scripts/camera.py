@@ -62,7 +62,7 @@ while (True):
     #cv2.imshow("preview", frame)
     #cv2.imwrite("outputImage.jpg", frame)
     img_msg = to_ros_image(frame)
-    img_msg.header.stamp = rospy.Time.now() - rospy.Duration(258) #offset with RUR clock
+    img_msg.header.stamp = rospy.Time.now() #- rospy.Duration(258) #offset with RUR clock
     img_msg.header.frame_id = 'camera'
     pub.publish(img_msg)
     # Waits for a user input to quit the application
