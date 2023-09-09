@@ -41,11 +41,11 @@ if __name__ == "__main__":
     #path_bag = "/media/leonardo/Elements/bag/hospital1_static.bag"
     # t_laser = "/scan"
     # t_img = "/theta_camera/image_raw"
-    path_out = "/home/leonardo/workspace/data/hospital1/out/" #read processed bag
-    out_path_scans = "/home/leonardo/workspace/data/hospital1/out/img_out" #visualization
-    out_path_det = "/home/leonardo/workspace/data/hospital1/out/yolo_out" #visualization
-    out_path_associations = "/home/leonardo/workspace/data/hospital1/out/a" #visualization
-    out_path_annotations = "/home/leonardo/workspace/data/hospital1/out"
+    path_out = "/home/leonardo/Downloads/lab_indoor_1/" #read processed bag
+    out_path_scans = "/home/leonardo/Downloads/lab_indoor_1/img_out" #visualization
+    out_path_det = "/home/leonardo/Downloads/lab_indoor_1/yolo_out" #visualization
+    out_path_associations = "/home/leonardo/Downloads/lab_indoor_1/a" #visualization
+    out_path_annotations = "/home/leonardo/Downloads/lab_indoor_1/"
 
     # Specify the path of the calibration data
     calibration_path = "../auto_calibration_tools/scripts/camera_laser_calibration/laser2camera_map.pkl"
