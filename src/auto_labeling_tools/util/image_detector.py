@@ -15,8 +15,6 @@ from src.auto_labeling_tools.util.laser_detector import LaserDetector
 from src.auto_labeling_tools.util.visualization import plot_scans, plot_detection
 from src.auto_labeling_tools.util.cube_projection import CubeProjection
 
-import sys
-sys.path.append('../yolov7')
 from src.auto_labeling_tools.yolov7.models.experimental import attempt_load
 from src.auto_labeling_tools.yolov7.utils.datasets import letterbox, LoadImages
 from src.auto_labeling_tools.yolov7.utils.general import check_img_size, non_max_suppression, scale_coords, xyxy2xywh, set_logging, xyn2xy

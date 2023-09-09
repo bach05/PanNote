@@ -1,0 +1,36 @@
+<launch>
+
+  <!-- Specify the topics you want to record -->
+  <arg name="topics" default="/scan2 /tf /theta_camera/image_raw2"/>
+  <!-- Specify the directory where you want to save the bag file -->
+  <arg name="bag_dir" default="$(find auto_calibration_tools)/bags"/>
+  <!-- Specify the custom bag file name -->
+
+  <arg name="input_bag_file" default="hospital3_static.bag" />
+  <!-- Specify the path and name of the output ROS bag file to be recorded -->
+  <arg name="output_bag_file" default="hospital3_static_2.bag" />
+
+  <!-- Launch the ROS bag player -->
+  <node name="bag_player" pkg="rosbag" type="play" required="true" args="$(arg bag_dir)/$(arg input_bag_file)">
+    <param name="pause" value="false" />
+  </node>
+
+    <!-- Declare the node -->
+  <node
+    name="scan_republisher_node"
+    pkg="auto_calibration_tools"
+    type="laser.py"
+    output="screen">
+  </node>
+
+    <node
+    name="cam_republisher_node"
+    pkg="auto_calibration_tools"
+    type="camera_retiming.py"
+    output="screen">
+  </node>
+
+  <!-- Launch the ROS bag recorder in parallel -->
+  <node name="bag_recorder" pkg="rosbag" type="record" args="--output-name=$(arg bag_dir)/$(arg output_bag_file) $(arg topics)">
+  </node>
+</launch>
