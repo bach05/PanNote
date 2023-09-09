@@ -213,5 +213,5 @@ if __name__ == "__main__":
         file_annotation.flush()
         os.fsync(file_annotation.fileno())
 
-
+    file_annotation.close()
 
