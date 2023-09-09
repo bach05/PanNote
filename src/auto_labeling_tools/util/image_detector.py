@@ -29,7 +29,7 @@ class ImageDetector:
         if self.tracking:
             self.tracker = DeepSort(max_age=15)
 
-    def compute_detections_sides(self, img, out_path_det=None):
+    def compute_detections_sides(self, img, out_path_det=None, frame=0):
         if out_path_det is not None:
             rep_image = img.copy()
             rep_image_track = img.copy()
@@ -69,7 +69,7 @@ class ImageDetector:
 
                 # plot side
                 if out_path_det is not None:
-                    plot_detection(cv_image, detected, face + str(id).zfill(4), out_path_det + "/side/" + face + "_")
+                    plot_detection(cv_image, detected, face + str(frame).zfill(4), out_path_det + "/side/" + face + "_")
 
         # plot only border
         outside_detections = [not d for d in inside_detections]
@@ -111,7 +111,7 @@ class ImageDetector:
             for det in new_detections:
                 rep_image = cv2.rectangle(rep_image, det[:2], det[2:], (255, 0, 0), 5)
 
-            cv2.imwrite(out_path_det+'/rep/rep_' + str(str(id).zfill(4)) + '.jpg', cv2.cvtColor(rep_image, cv2.COLOR_BGR2RGB))
+            cv2.imwrite(out_path_det+'/rep/rep_' + str(str(frame).zfill(4)) + '.jpg', cv2.cvtColor(rep_image, cv2.COLOR_BGR2RGB))
 
         if len(new_detections) > 0:
             rep_detections = np.concatenate((new_detections, rep_inside))
@@ -143,7 +143,7 @@ class ImageDetector:
                     rep_image_track = cv2.putText(rep_image_track, track_id, ltrb[:2].astype(int), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
             if out_path_det is not None:
-                cv2.imwrite(out_path_det + '/track/track_' + str(str(id).zfill(4)) + '.jpg', cv2.cvtColor(rep_image_track, cv2.COLOR_BGR2RGB))
+                cv2.imwrite(out_path_det + '/track/track_' + str(str(frame).zfill(4)) + '.jpg', cv2.cvtColor(rep_image_track, cv2.COLOR_BGR2RGB))
 
         return rep_detections, face_detections, tracking_out
 

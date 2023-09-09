@@ -174,6 +174,8 @@ class ClickHandler:
             self.buffer = ""
             self.line_right.remove()
             self.line_left.remove()
+            self.line_right = None
+            self.line_left = None
 
         if event.key == "delete":
             print("reset")
@@ -185,7 +187,7 @@ class ClickHandler:
 def main():
 
     # Define the folder path
-    folder_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/manual_labelling/lab_indoor_1"
+    folder_path = "/home/leonardo/workspace/data/hospital1/out/"
 
     # Load the laser scan data from scan.csv
     scan_df = pd.read_csv(os.path.join(folder_path, 'laser.csv'), sep='\t', header=None)
