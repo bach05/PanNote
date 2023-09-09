@@ -12,6 +12,7 @@ from numpy import clip
 
 import detect_people
 from src.auto_labeling_tools.util.cube_projection import from_cube2panoramic
+from src.auto_labeling_tools.util.image_detector import ImageDetector
 from src.auto_labeling_tools.util.laser_detector import LaserDetector
 from src.auto_labeling_tools.util.visualization import plot_scans, plot_detection
 from src.auto_labeling_tools.util.cube_projection import CubeProjection
@@ -63,7 +64,8 @@ if __name__ == "__main__":
     scans, ids = read_scan(path_laser)
 
     # set yolo
-    yolo_model = detect_people.load_model(weights="models/yolov7.pt")
+    #yolo_model = detect_people.load_model(weights="models/yolov7.pt")
+    imde = ImageDetector("models/yolov7.pt")
 
     # set laser detector
     ld = LaserDetector(scans, laser_spec)
@@ -84,44 +86,9 @@ if __name__ == "__main__":
         # read panoramic
         img1 = cv2.imread(img_path)
         cv2_image_rgb = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
-        rep_image = cv2_image_rgb.copy()
 
-        # project to side
-        sides = CubeProjection(Image.fromarray(cv2_image_rgb), '')
-        sides.cube_projection()
-
-        # for each face
-        rep_detections = []
-        face_detections = {}
-        for face, side_img in sides.sides.items():
-            if face in ["front", "back", "left", "right"]:
-
-                face_det = []
-
-                # detect
-                cv_image = np.array(side_img)
-                detected, objects_pose = detect_people.detect_person(cv_image, yolo_model)
-                face_detections[face] = detected
-
-                # reproject detections
-                for j in range(len(detected)):
-                    pan_point_1 = from_cube2panoramic(face, [detected[j][0], detected[j][1]])
-                    pan_point_2 = from_cube2panoramic(face, [detected[j][2], detected[j][3]])
-
-                    # check if it cross the edge
-                    if abs(pan_point_2[0] - pan_point_1[0]) < image_spec["width"]/2:
-                        rep_detections.append([pan_point_1[0], pan_point_1[1], pan_point_2[0], pan_point_2[1]])
-
-                        rep_image = cv2.rectangle(rep_image, pan_point_1, pan_point_2, (0, 255, 0), 5)
-
-                # plot side
-                plot_detection(cv_image, detected, face+str(id).zfill(4), out_path_det+"/"+face+"_")
-
-        # plot reprojected
-        cv2.imwrite(out_path_det+'/rep_' + str(str(id).zfill(4)) + '.jpg', cv2.cvtColor(rep_image, cv2.COLOR_BGR2RGB))
-
-        detected_pan, objects_poses = detect_people.detect_person(cv2_image_rgb, yolo_model)
-        plot_detection(cv2_image_rgb, detected_pan, str(id).zfill(4), out_path_det+"/")
+        cv_image = np.array(cv2_image_rgb)
+        rep_detections, face_detections, _ = imde.compute_detections_sides(cv_image)
 
         # at this point
         # yolo from panoramic = detected_pan
