@@ -99,6 +99,9 @@ src/auto_calibration_tools/bags/
 src/manual_labelling/sync/
 src/manual_labelling/synch/
 
+src/manual_labelling/lab_indoor_1.zip
+src/manual_labelling/synch2/
+
 __pycache__/*
 */__pycache__
 *.tsv

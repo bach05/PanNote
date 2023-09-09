@@ -15,9 +15,7 @@ import re
 import pickle
 import cv2
 
-import sys
-sys.path.append('..')
-from auto_calibration_tools.scripts.camera_laser_calibration.calibrateCamera2LaserPnP import projectPoint2Image
+from src.auto_calibration_tools.scripts.camera_laser_calibration.calibrateCamera2LaserPnP import projectPoint2Image
 import detect_people
 from matplotlib.backend_bases import MouseButton
 
@@ -187,7 +185,7 @@ class ClickHandler:
 def main():
 
     # Define the folder path
-    folder_path = "/media/leonardo/Elements/prova"
+    folder_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/manual_labelling/lab_indoor_1"
 
     # Load the laser scan data from scan.csv
     scan_df = pd.read_csv(os.path.join(folder_path, 'laser.csv'), sep='\t', header=None)
@@ -230,8 +228,10 @@ def main():
     image_folder_path = os.path.join(folder_path, "img")
 
     for index, row in scan_df.iterrows():
+
         if index < 30:
             continue
+
         # Split the input string by comma and remove leading/trailing whitespace
         row = row[0].split(',')
 

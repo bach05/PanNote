@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from PIL import Image
+import argparse
 
 import matplotlib as mpl
 mpl.use('TkAgg')
@@ -100,8 +101,16 @@ class ClickHandler:
 
 def main():
 
-    # Define the folder path
-    folder_path = "hospital3_static"
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description="Check the coupling between laser and image detections")
+    # Add an argument for folder_path
+    # Add an argument for folder_path with a default value
+    parser.add_argument("folder_path", nargs='?', default="hospital3_static", help="Path to the folder")
+
+    # Parse the command line arguments
+    args = parser.parse_args()
+    # Access the folder_path argument
+    folder_path = args.folder_path
 
     # Load the laser scan data from scan.csv
     scan_df = pd.read_csv(os.path.join(folder_path, 'laser.csv'), sep='\t', header=None)

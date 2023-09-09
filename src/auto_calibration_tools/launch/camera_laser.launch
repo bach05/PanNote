@@ -1,0 +1,18 @@
+<launch>
+
+  <!-- Declare the node -->
+  <node
+    name="VideoPublisher"
+    pkg="auto_calibration_tools"
+    type="camera.py"
+    output="screen">
+  </node>
+
+  <!-- Declare the node -->
+  <node
+    name="scan_republisher_node"
+    pkg="auto_calibration_tools"
+    type="laser.py"
+    output="screen">
+  </node>
+</launch>

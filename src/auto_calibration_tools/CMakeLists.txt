@@ -162,6 +162,8 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   scripts/camera.py
+  scripts/camera_retiming.py
+  scripts/laser.py
   scripts/sync_image_scan.py
   scripts/calibration_data_intrinsics/splitImage.py
   scripts/calibration_data_intrinsics/cube_projection.py
