@@ -66,7 +66,7 @@ class DataSaverNode:
         frame_id = self.image_count
         os.system('spd-say "Starting acquisition of image {}"'.format(frame_id))
 
-        rospy.sleep(2)
+        rospy.sleep(3)
 
         if self.image_data is not None and self.scan_data is not None:
             # Perform data processing here if needed
