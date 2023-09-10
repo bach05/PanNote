@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 
 def calculate_iou(box1, box2):
@@ -53,10 +54,13 @@ def read_data(path):
     file.close()
 
     return dic_data
+
+
 if __name__ == "__main__":
 
-    path_gt = "/home/leonardo/workspace/data/hospital1/out/annotations.csv"
-    path_annotation = "/home/leonardo/workspace/data/hospital1/out/automatic_annotations.csv"
+    base_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/lab_indoor_1"
+    path_gt = os.path.join(base_path, "annotations_"+"lab_indoor_1.csv")
+    path_annotation = os.path.join(base_path,"out/automatic_annotations.csv")
 
     annotated_data = {}
 
@@ -138,4 +142,15 @@ if __name__ == "__main__":
 
     print("Total gt ", total_boxes_gt, " Total annotated: ", total_boxes_annotated, " matched: ", matched_boxes)
 
+    # Open the file for writing
+    output_file_path = os.path.join(base_path, "results_annotations.txt")
+    with open(output_file_path, 'w') as output_file:
+        # Write the output to the file
+        output_file.write(f"Mean error: {np.mean(distances)}\n")
+        output_file.write(f"Acc 1: {correct_1 / matched_boxes}\n")
+        output_file.write(f"Acc 0.5: {correct_05 / matched_boxes}\n")
+        output_file.write(f"Acc 0.25: {correct_025 / matched_boxes}\n")
+        output_file.write(f"Acc 0.10: {correct_010 / matched_boxes}\n")
+        output_file.write(
+            f"Total gt {total_boxes_gt}, Total annotated: {total_boxes_annotated}, matched: {matched_boxes}\n")
 
