@@ -191,7 +191,9 @@ class ClickHandler:
 def main():
 
     # Define the folder path
-    folder_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/lab_indoor_3_2"
+    folder_path = "/media/leonardo/Elements/lab_outdoor_1_2/"
+
+
 
     # Load the laser scan data from scan.csv
     scan_df = pd.read_csv(os.path.join(folder_path, 'laser.csv'), sep='\t', header=None)
