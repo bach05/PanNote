@@ -190,7 +190,7 @@ class ClickHandler:
 def main():
 
     # Define the folder path
-    folder_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/hospital3_static"
+    folder_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/lab_indoor_3_2"
 
     # Load the laser scan data from scan.csv
     scan_df = pd.read_csv(os.path.join(folder_path, 'laser.csv'), sep='\t', header=None)
@@ -209,7 +209,7 @@ def main():
     file_path = "../auto_calibration_tools/scripts/camera_laser_calibration/laser2camera_map.pkl"
 
     # ouput path
-    out_file = os.path.join(folder_path, "annotations_hospital3_static.csv")
+    out_file = os.path.join(folder_path, "manual_ann_lab_indoor_3_2.csv")
     if os.path.exists(out_file):
         file_annotation = open(out_file, "a")
     else:

@@ -41,16 +41,16 @@ class MLP(nn.Module):
 def train():
 
     input_dim = 4  # Change this to match your input dimension
-    layer_sizes = [8, 8, 2]  # Specify the sizes of hidden layers
+    layer_sizes = [16, 64, 64, 16, 2]  # Specify the sizes of hidden layers
     learning_rate = 0.0001
-    batch_size = 8
+    batch_size = 16
     epochs = 10
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Initialize your custom dataset
     base_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction"
-    files = ['lab_indoor_1/annotations_lab_indoor_1.csv', 'hospital3_static/annotations_hospital3_static.csv']  # Replace with your file paths
+    files = ['lab_indoor_1_full/out/automatic_annotations.csv', 'hospital3_static_full/out/automatic_annotations.csv']  # Replace with your file paths
 
     file_list = [os.path.join(base_path, file) for file in files]
 
