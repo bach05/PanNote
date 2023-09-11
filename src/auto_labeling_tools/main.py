@@ -45,7 +45,7 @@ if __name__ == "__main__":
     #path_bag = "/media/leonardo/Elements/bag/hospital1_static.bag"
     # t_laser = "/scan"
     # t_img = "/theta_camera/image_raw"
-    path_out = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/lab_outdoor_1_2" #read processed bag
+    path_out = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/hospital3_static_full" #read processed bag
 
     out_path_scans = os.path.join(path_out, "out/img_out") #visualization
     out_path_det =  os.path.join(path_out, "out/yolo_out") #visualization
