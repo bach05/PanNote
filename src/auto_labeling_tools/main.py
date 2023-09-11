@@ -46,6 +46,7 @@ if __name__ == "__main__":
     # t_laser = "/scan"
     # t_img = "/theta_camera/image_raw"
     path_out = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/lab_outdoor_1_2" #read processed bag
+
     out_path_scans = os.path.join(path_out, "out/img_out") #visualization
     out_path_det =  os.path.join(path_out, "out/yolo_out") #visualization
     out_path_associations =  os.path.join(path_out, "out/a") #visualization
@@ -111,6 +112,7 @@ if __name__ == "__main__":
 
     start_time = time.time()
     for i in range(0, len(ids)):
+
         scan = scans[i]
         id = ids[i]
         image_index = str(id).zfill(4)

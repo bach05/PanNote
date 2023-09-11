@@ -3,6 +3,7 @@ import pandas as pd
 from PIL import Image
 
 import matplotlib as mpl
+import sys
 
 import sys
 sys.path.append('..')
@@ -237,6 +238,7 @@ def main():
         # if index < 30:
         #     continue
 
+
         # Split the input string by comma and remove leading/trailing whitespace
         row = row[0].split(',')
 
@@ -284,10 +286,10 @@ def main():
             point1 = detected[j][:2]
             point2 = detected[j][2:]
             cv2.rectangle(cv_image, point1, point2, (0, 255, 0), 3)
-            cv2.putText(cv_image, str(j), point1, cv2.FONT_HERSHEY_SIMPLEX, 4, (255, 0, 0), 3, cv2.LINE_AA)
+            cv2.putText(cv_image, str(j), point1, cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 3, cv2.LINE_AA)
 
         # Create a 1x2 grid of subplots
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 9))
         ch = ClickHandler(read_ax=ax2, write_ax=ax1, H=H)
         ch.set_pointcloud(points)
         ch.set_bbox(detected)

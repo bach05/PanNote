@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from tqdm import tqdm
+
 from utils.dataset import PanoPosDataset  # Replace with the actual name of your dataset class
 import os
 
@@ -32,8 +34,11 @@ class MLP(nn.Module):
             layers.append(nn.LeakyReLU())
 
 
+        layers.append(nn.Linear(layer_sizes[-1], 2))
+
         # Combine the layers into a sequential model
         self.mlp = nn.Sequential(*layers)
+
 
     def forward(self, x):
         return self.mlp(x)
@@ -41,10 +46,10 @@ class MLP(nn.Module):
 def train():
 
     input_dim = 4  # Change this to match your input dimension
-    layer_sizes = [16, 64, 64, 16, 2]  # Specify the sizes of hidden layers
-    learning_rate = 0.0001
-    batch_size = 16
-    epochs = 10
+    layer_sizes = [4, 8, 16, 32, 64]  # Specify the sizes of hidden layers
+    learning_rate = 0.0005
+    batch_size = 4
+    epochs = 200
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -60,21 +65,21 @@ def train():
     #train_dataset.visualize_data()
 
     # Create data loaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size//2, shuffle=True, num_workers=2)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0)
 
 
     # Initialize the MLP model, loss function, and optimizer
     model = MLP(input_dim, layer_sizes).to(device)
     print(model)
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01)
 
     # Training loop
     for epoch in range(epochs):
 
         train_loss = 0
-        for box, pos_2d in train_loader:
+        for box, pos_2d in (train_loader):
 
             box = box.to(device)
             train_pos_2d = pos_2d.to(device)
