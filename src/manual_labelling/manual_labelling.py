@@ -5,7 +5,10 @@ from PIL import Image
 import matplotlib as mpl
 import sys
 
-from src.auto_labeling_tools.util.image_detector import ImageDetector
+import sys
+sys.path.append('..')
+
+from auto_labeling_tools.util.image_detector import ImageDetector
 
 mpl.use('TkAgg')
 
@@ -16,7 +19,7 @@ import re
 import pickle
 import cv2
 
-from src.auto_calibration_tools.scripts.camera_laser_calibration.calibrateCamera2LaserPnP import projectPoint2Image
+from auto_calibration_tools.scripts.camera_laser_calibration.calibrateCamera2LaserPnP import projectPoint2Image
 import detect_people
 from matplotlib.backend_bases import MouseButton
 
@@ -190,6 +193,7 @@ def main():
     # Define the folder path
     folder_path = "/home/leonardo/Downloads/hospital1_static/"
 
+
     # Load the laser scan data from scan.csv
     scan_df = pd.read_csv(os.path.join(folder_path, 'laser.csv'), sep='\t', header=None)
 
@@ -207,7 +211,7 @@ def main():
     file_path = "../auto_calibration_tools/scripts/camera_laser_calibration/laser2camera_map.pkl"
 
     # ouput path
-    out_file = os.path.join(folder_path, "annotations.csv")
+    out_file = os.path.join(folder_path, "annotations_hospital3_static.csv")
     if os.path.exists(out_file):
         file_annotation = open(out_file, "a")
     else:
@@ -232,8 +236,9 @@ def main():
 
     for index, row in scan_df.iterrows():
 
-        if index < 42:
-            continue
+        # if index < 30:
+        #     continue
+
 
         # Split the input string by comma and remove leading/trailing whitespace
         row = row[0].split(',')
@@ -326,8 +331,6 @@ def main():
         file_annotation.write("\n")
         file_annotation.flush()
         os.fsync(file_annotation.fileno())
-
-
 
 
 

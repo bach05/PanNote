@@ -105,7 +105,7 @@ def main():
     parser = argparse.ArgumentParser(description="Check the coupling between laser and image detections")
     # Add an argument for folder_path
     # Add an argument for folder_path with a default value
-    parser.add_argument("folder_path", nargs='?', default="hospital3_static", help="Path to the folder")
+    parser.add_argument("folder_path", nargs='?', default="../auto_calibration_tools/bag_extraction/hospital1_static", help="Path to the folder")
 
     # Parse the command line arguments
     args = parser.parse_args()

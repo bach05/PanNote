@@ -10,16 +10,16 @@ import numpy as np
 from PIL import Image
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
-from src.auto_labeling_tools.util.cube_projection import from_cube2panoramic
-from src.auto_labeling_tools.util.laser_detector import LaserDetector
-from src.auto_labeling_tools.util.visualization import plot_scans, plot_detection
-from src.auto_labeling_tools.util.cube_projection import CubeProjection
+from auto_labeling_tools.util.cube_projection import from_cube2panoramic
+from auto_labeling_tools.util.laser_detector import LaserDetector
+from auto_labeling_tools.util.visualization import plot_scans, plot_detection
+from auto_labeling_tools.util.cube_projection import CubeProjection
 
-from src.auto_labeling_tools.yolov7.models.experimental import attempt_load
-from src.auto_labeling_tools.yolov7.utils.datasets import letterbox, LoadImages
-from src.auto_labeling_tools.yolov7.utils.general import check_img_size, non_max_suppression, scale_coords, xyxy2xywh, set_logging, xyn2xy
-from src.auto_labeling_tools.yolov7.utils.plots import plot_one_box
-from src.auto_labeling_tools.yolov7.utils.torch_utils import select_device, time_synchronized, load_classifier, TracedModel
+from auto_labeling_tools.yolov7.models.experimental import attempt_load
+from auto_labeling_tools.yolov7.utils.datasets import letterbox, LoadImages
+from auto_labeling_tools.yolov7.utils.general import check_img_size, non_max_suppression, scale_coords, xyxy2xywh, set_logging, xyn2xy
+from auto_labeling_tools.yolov7.utils.plots import plot_one_box
+from auto_labeling_tools.yolov7.utils.torch_utils import select_device, time_synchronized, load_classifier, TracedModel
 
 class ImageDetector:
     def __init__(self, model_path="../models/yolov7.pt", tracking=False, width=3840):

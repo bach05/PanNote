@@ -11,6 +11,9 @@ mpl.use('TkAgg')
 
 from matplotlib import pyplot as plt, patches
 
+import sys
+sys.path.append('..')
+
 import detect_people
 from src.auto_calibration_tools.scripts.camera_laser_calibration.calibrateCamera2LaserPnP import projectPoint2Image
 from src.auto_labeling_tools.util.cube_projection import from_cube2panoramic
@@ -41,11 +44,11 @@ if __name__ == "__main__":
     #path_bag = "/media/leonardo/Elements/bag/hospital1_static.bag"
     # t_laser = "/scan"
     # t_img = "/theta_camera/image_raw"
-    path_out = "/home/leonardo/Downloads/hospital1_static/" #read processed bag
-    out_path_scans = "/home/leonardo/Downloads/hospital1_static/img_out" #visualization
-    out_path_det = "/home/leonardo/Downloads/hospital1_static/yolo_out" #visualization
-    out_path_associations = "/home/leonardo/Downloads/hospital1_static/a" #visualization
-    out_path_annotations = "/home/leonardo/Downloads/hospital1_static/"
+    path_out = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/lab_indoor_1" #read processed bag
+    out_path_scans = os.path.join(path_out, "out/img_out") #visualization
+    out_path_det =  os.path.join(path_out, "out/yolo_out") #visualization
+    out_path_associations =  os.path.join(path_out, "out/a") #visualization
+    out_path_annotations =  os.path.join(path_out, "out")
 
     # Specify the path of the calibration data
     calibration_path = "../auto_calibration_tools/scripts/camera_laser_calibration/laser2camera_map.pkl"
@@ -66,6 +69,22 @@ if __name__ == "__main__":
 
     path_laser = osp.join(path_out, "laser.csv")
     path_images = osp.join(path_out, "img")
+
+    #create folders
+    out_folder = os.path.join(path_out, "out")
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
+        print(f"Folder {out_folder} created.")
+        os.makedirs(os.path.join(out_folder, "img_out"))
+        print(f"Folder {os.path.join(out_folder, 'img_out')} created.")
+        os.makedirs(os.path.join(out_folder, "yolo_out"))
+        print(f"Folder {os.path.join(out_folder, 'yolo_out')} created.")
+        os.makedirs(os.path.join(out_folder, "yolo_out","side"))
+        print(f"Folder {os.path.join(out_folder, 'yolo_out','side')} created.")
+        os.makedirs(os.path.join(out_folder,"a"))
+        print(f"Folder {os.path.join(out_folder, 'a')} created.")
+    else:
+        print(f"Folder '{out_folder}' already exists.")
 
     # ouput path
     out_file = os.path.join(out_path_annotations, "automatic_annotations.csv")
@@ -89,7 +108,8 @@ if __name__ == "__main__":
     # set laser detector
     ld = LaserDetector(scans, laser_spec)
 
-    for i in range(len(ids)):
+    for i in range(0, len(ids)):
+
         scan = scans[i]
         id = ids[i]
         image_index = str(id).zfill(4)
@@ -117,6 +137,12 @@ if __name__ == "__main__":
         # point detected as people from laser = people
         # label of each point = labels
         # centroid of each detected person = cluster_centroids
+
+        if len(cluster_centroids) == 0:
+            print(f"**** No people detect in the laser, skipping img {image_index}")
+            file_annotation.write(image_index)
+            continue
+
 
         lines = projectPoint2Image(cluster_centroids, H)
         distances = np.linalg.norm(cluster_centroids, axis=1)
