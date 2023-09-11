@@ -62,8 +62,6 @@ def train():
 
     train_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="train")
     val_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="val")
-    test_dataset = PanoPosDataset(file_list_test, image_res=[3840, 1920], mode="test")
-    test_dataset_auto = PanoPosDataset(file_list_test_auto, image_res=[3840, 1920], mode="test")
 
     #train_dataset.visualize_data()
 
