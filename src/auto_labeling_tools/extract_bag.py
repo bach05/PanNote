@@ -7,9 +7,9 @@ from util.bag_extractor import Bag_manager
 if __name__ == "__main__":
 
     #path_bag = "/media/iaslab/Elements/bag/hospital3_static.bag"
-    path_bag = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bags/hospital3_static_2.bag"
-    t_laser = "/scan2"
-    t_img = "/theta_camera/image_raw2"
+    path_bag = "/home/leonardo/workspace/data/hospital1/hospital1_static.bag"
+    t_laser = "/scan"
+    t_img = "/theta_camera/image_raw"
     path_out = "../manual_labelling/hospital3_static"
 
     path_laser = osp.join(path_out, "laser.csv")

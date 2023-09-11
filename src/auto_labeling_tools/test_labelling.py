@@ -53,10 +53,11 @@ def read_data(path):
     file.close()
 
     return dic_data
+
 if __name__ == "__main__":
 
-    path_gt = "/home/leonardo/Downloads/lab_indoor_1/annotations.csv"
-    path_annotation = "/home/leonardo/Downloads/lab_indoor_1/automatic_annotations.csv"
+    path_gt = "/home/leonardo/Downloads/hospital1_static/annotations.csv"
+    path_annotation = "/home/leonardo/Downloads/hospital1_static/automatic_annotations.csv"
 
     annotated_data = {}
 

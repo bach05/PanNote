@@ -3,6 +3,7 @@ import pandas as pd
 from PIL import Image
 
 import matplotlib as mpl
+import sys
 
 from src.auto_labeling_tools.util.image_detector import ImageDetector
 
@@ -187,7 +188,7 @@ class ClickHandler:
 def main():
 
     # Define the folder path
-    folder_path = "/home/leonardo/Downloads/lab_indoor_1/"
+    folder_path = "/home/leonardo/Downloads/hospital1_static/"
 
     # Load the laser scan data from scan.csv
     scan_df = pd.read_csv(os.path.join(folder_path, 'laser.csv'), sep='\t', header=None)
@@ -231,7 +232,7 @@ def main():
 
     for index, row in scan_df.iterrows():
 
-        if index < 30:
+        if index < 42:
             continue
 
         # Split the input string by comma and remove leading/trailing whitespace
@@ -281,10 +282,10 @@ def main():
             point1 = detected[j][:2]
             point2 = detected[j][2:]
             cv2.rectangle(cv_image, point1, point2, (0, 255, 0), 3)
-            cv2.putText(cv_image, str(j), point1, cv2.FONT_HERSHEY_SIMPLEX, 4, (255, 0, 0), 3, cv2.LINE_AA)
+            cv2.putText(cv_image, str(j), point1, cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 3, cv2.LINE_AA)
 
         # Create a 1x2 grid of subplots
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 9))
         ch = ClickHandler(read_ax=ax2, write_ax=ax1, H=H)
         ch.set_pointcloud(points)
         ch.set_bbox(detected)

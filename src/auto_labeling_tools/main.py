@@ -41,11 +41,11 @@ if __name__ == "__main__":
     #path_bag = "/media/leonardo/Elements/bag/hospital1_static.bag"
     # t_laser = "/scan"
     # t_img = "/theta_camera/image_raw"
-    path_out = "/home/leonardo/Downloads/lab_indoor_1/" #read processed bag
-    out_path_scans = "/home/leonardo/Downloads/lab_indoor_1/img_out" #visualization
-    out_path_det = "/home/leonardo/Downloads/lab_indoor_1/yolo_out" #visualization
-    out_path_associations = "/home/leonardo/Downloads/lab_indoor_1/a" #visualization
-    out_path_annotations = "/home/leonardo/Downloads/lab_indoor_1/"
+    path_out = "/home/leonardo/Downloads/hospital1_static/" #read processed bag
+    out_path_scans = "/home/leonardo/Downloads/hospital1_static/img_out" #visualization
+    out_path_det = "/home/leonardo/Downloads/hospital1_static/yolo_out" #visualization
+    out_path_associations = "/home/leonardo/Downloads/hospital1_static/a" #visualization
+    out_path_annotations = "/home/leonardo/Downloads/hospital1_static/"
 
     # Specify the path of the calibration data
     calibration_path = "../auto_calibration_tools/scripts/camera_laser_calibration/laser2camera_map.pkl"
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     # set laser detector
     ld = LaserDetector(scans, laser_spec)
 
-    for i in range(30, len(ids)):
+    for i in range(len(ids)):
         scan = scans[i]
         id = ids[i]
         image_index = str(id).zfill(4)
