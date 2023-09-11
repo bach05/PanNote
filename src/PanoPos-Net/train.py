@@ -55,24 +55,33 @@ def train():
 
     # Initialize your custom dataset
     base_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction"
-    #files = ['lab_indoor_1/annotations_lab_indoor_1.csv', 'hospital3_static/annotations_hospital3_static.csv']  # Replace with your file paths
-    files = ['/home/leonardo/Downloads/labelling_csv/annotations_h1.csv', '/home/leonardo/Downloads/labelling_csv/annotations_h3.csv', '/home/leonardo/Downloads/labelling_csv/annotations_l1.csv']
-    file_list = [os.path.join(base_path, file) for file in files]
+    # files = ['lab_indoor_1/annotations_lab_indoor_1.csv', 'hospital3_static/annotations_hospital3_static.csv']  # Replace with your file paths
+    files_man = ['/home/leonardo/Downloads/labelling_csv/annotations_h1.csv', '/home/leonardo/Downloads/labelling_csv/annotations_h3.csv', '/home/leonardo/Downloads/labelling_csv/annotations_l1.csv']
+    files_auto = ['/home/leonardo/Downloads/labelling_csv/automatic_annotations_h1.csv', '/home/leonardo/Downloads/labelling_csv/automatic_annotations_h3.csv', '/home/leonardo/Downloads/labelling_csv/automatic_annotations_l1.csv']
+    file_test_man = ["/home/leonardo/Downloads/labelling_csv/annotations_l12.csv"]
+    file_test_auto = ["/home/leonardo/Downloads/labelling_csv/automatic_annotations_l12.csv"]
+    file_list = [os.path.join(base_path, file) for file in files_auto]
+    file_list_test = [os.path.join(base_path, file) for file in file_test_man]
+    file_list_test_auto = [os.path.join(base_path, file) for file in file_test_auto]
 
     train_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="train")
     val_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="val")
+    test_dataset = PanoPosDataset(file_list_test, image_res=[3840, 1920], mode="test")
+    test_dataset_auto = PanoPosDataset(file_list_test_auto, image_res=[3840, 1920], mode="test")
 
     #train_dataset.visualize_data()
 
     # Create data loaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0)
+    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True, num_workers=0)
+    test_loader_auto = DataLoader(test_dataset_auto, batch_size=1, shuffle=True, num_workers=0)
 
 
     # Initialize the MLP model, loss function, and optimizer
     model = MLP(input_dim, layer_sizes).to(device)
     print(model)
-    criterion = nn.MSELoss()
+    criterion = nn.L1Loss()
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01)
 
     # Training loop
@@ -115,6 +124,34 @@ def train():
 
         # Print the loss for this epoch and validation loss
         print(f'Epoch [{epoch + 1}/{epochs}], Training Loss: {loss.item():.4f}, Validation Loss: {val_loss:.4f}')
+
+    with torch.no_grad():
+        val_loss = 0.0
+        for val_box, val_pos_2d in test_loader:
+            val_box = val_box.to(device)
+            val_pos_2d = val_pos_2d.to(device)
+
+            val_outputs = model(val_box)
+            val_loss += criterion(val_outputs, val_pos_2d).item()
+
+    val_loss /= len(val_loader)  # Calculate the average validation loss
+
+    # Print the loss for this epoch and validation loss
+    print(f'Test man Loss: {val_loss:.4f}')
+    with torch.no_grad():
+        val_loss = 0.0
+        for val_box, val_pos_2d in test_loader_auto:
+            val_box = val_box.to(device)
+            val_pos_2d = val_pos_2d.to(device)
+
+            val_outputs = model(val_box)
+            val_loss += criterion(val_outputs, val_pos_2d).item()
+
+    val_loss /= len(val_loader)  # Calculate the average validation loss
+
+    # Print the loss for this epoch and validation loss
+    print(f'Test auto Loss: {val_loss:.4f}')
+
 
 
 

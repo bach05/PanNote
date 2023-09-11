@@ -20,7 +20,7 @@ class PanoPosDataset(Dataset):
         self.file_list = file_list
         self.img_res = image_res
         self.split_ratio = split_ratio
-        assert mode in ["train", "val"]
+        assert mode in ["train", "val", "test"]
         self.mode = mode
 
         # Seed the random number generator for reproducibility
@@ -61,13 +61,21 @@ class PanoPosDataset(Dataset):
         #split_index = int(split_ratio * len(self.data_list))
         self.train_data = np.array(self.data_list)[split_train]
         self.val_data = np.array(self.data_list)[split_val]
+        self.test_data = np.array(self.data_list)
+
+        if self.mode == "train":
+            self.data = self.train_data
+        elif self.mode == "val":
+            self.data = self.train_data
+        elif self.mode == "test":
+            self.data = self.test_data
+
 
     def __len__(self):
         """
         Return the total number of samples in the dataset.
         """
-        return len(self.train_data) if self.mode == "train" else len(self.val_data)
-
+        return len(self.data)
     def __getitem__(self, idx):
         """
         Load and return data from the file at the given index.
@@ -78,7 +86,7 @@ class PanoPosDataset(Dataset):
         Returns:
             data (tuple of torch.Tensor): The loaded data as a tuple of PyTorch tensors (box, pos_2d).
         """
-        data = self.train_data[idx] if self.mode == "train" else self.val_data[idx]
+        data = self.data[idx]
 
         box, pos_2d = data
 

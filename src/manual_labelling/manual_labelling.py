@@ -191,7 +191,7 @@ class ClickHandler:
 def main():
 
     # Define the folder path
-    folder_path = "/home/leonardo/Downloads/hospital1_static/"
+    folder_path = "/media/leonardo/Elements/lab_outdoor_1_2/"
 
 
     # Load the laser scan data from scan.csv
