@@ -10,6 +10,7 @@ import matplotlib as mpl
 mpl.use('TkAgg')
 
 from matplotlib import pyplot as plt, patches
+import time
 
 import sys
 sys.path.append('..')
@@ -45,6 +46,7 @@ if __name__ == "__main__":
     # t_laser = "/scan"
     # t_img = "/theta_camera/image_raw"
     path_out = "/media/leonardo/Elements/lab_outdoor_1_2" #read processed bag
+
     out_path_scans = os.path.join(path_out, "out/img_out") #visualization
     out_path_det =  os.path.join(path_out, "out/yolo_out") #visualization
     out_path_associations =  os.path.join(path_out, "out/a") #visualization
@@ -108,6 +110,7 @@ if __name__ == "__main__":
     # set laser detector
     ld = LaserDetector(scans, laser_spec)
 
+    start_time = time.time()
     for i in range(0, len(ids)):
 
         scan = scans[i]
@@ -239,5 +242,7 @@ if __name__ == "__main__":
         file_annotation.flush()
         os.fsync(file_annotation.fileno())
 
+    end_time = time.time()
     file_annotation.close()
+    print(f"Time to annotate {len(ids)} images: {end_time-start_time}")
 

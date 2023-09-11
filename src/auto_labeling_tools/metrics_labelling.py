@@ -58,8 +58,9 @@ def read_data(path):
 
 if __name__ == "__main__":
 
-    base_path = "/media/leonardo/Elements/lab_outdoor_1_2/"
-    path_gt = os.path.join(base_path, "annotations_"+"lab_outdoor_1_2.csv")
+
+    base_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/lab_indoor_3_2"
+    path_gt = os.path.join(base_path, "manual_ann_"+"lab_indoor_3_2.csv")
     path_annotation = os.path.join(base_path,"out/automatic_annotations.csv")
 
     annotated_data = {}

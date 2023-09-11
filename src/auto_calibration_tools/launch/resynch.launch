@@ -6,9 +6,9 @@
   <arg name="bag_dir" default="$(find auto_calibration_tools)/bags"/>
   <!-- Specify the custom bag file name -->
 
-  <arg name="input_bag_file" default="hospital1_static.bag" />
+  <arg name="input_bag_file" default="lab_outdoor_1.bag" />
   <!-- Specify the path and name of the output ROS bag file to be recorded -->
-  <arg name="output_bag_file" default="hospital1_static_1.bag" />
+  <arg name="output_bag_file" default="lab_outdoor_1_2.bag" />
 
       <!-- Declare the node -->
   <node
