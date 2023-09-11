@@ -52,12 +52,15 @@ class PanoPosDataset(Dataset):
                         self.data_list.append((box, centroid))
 
         # Shuffle the data randomly
-        random.shuffle(self.data_list)
+        # random.shuffle(self.data_list)
+        split_train = list(range(0, len(self.data_list), 4)) + list(range(1, len(self.data_list), 4)) + list(range(2, len(self.data_list), 4))
+        split_train.sort()
+        split_val = list(range(3, len(self.data_list), 4))
 
         # Split the data_list into train and val based on split_ratio
-        split_index = int(split_ratio * len(self.data_list))
-        self.train_data = self.data_list[:split_index]
-        self.val_data = self.data_list[split_index:]
+        #split_index = int(split_ratio * len(self.data_list))
+        self.train_data = np.array(self.data_list)[split_train]
+        self.val_data = np.array(self.data_list)[split_val]
 
     def __len__(self):
         """
