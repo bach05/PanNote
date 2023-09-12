@@ -45,30 +45,35 @@ class MLP(nn.Module):
 
 def train():
 
-    input_dim = 4  # Change this to match your input dimension
-    layer_sizes = [4, 8, 16, 32, 64]  # Specify the sizes of hidden layers
+    input_dim = 17*3  # Change this to match your input dimension
+    layer_sizes = [64, 64]  # Specify the sizes of hidden layers
     learning_rate = 0.0005
     batch_size = 4
-    epochs = 200
+    epochs = 400
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Initialize your custom dataset
     base_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction"
+    files_auto = ['/media/leonardo/Elements/annotation_pano/hospital3_static/out/out_skeleton.csv',
+                  '/media/leonardo/Elements/annotation_pano/lab_indoor_1/out/out_skeleton.csv']
+    file_test_auto = ["/media/leonardo/Elements/annotation_pano/lab_indoor_3_2/out/out_skeleton.csv"]
+    file_list = [os.path.join(base_path, file) for file in files_auto]
+    #file_list_test = [os.path.join(base_path, file) for file in file_test_man]
+    file_list_test_auto = [os.path.join(base_path, file) for file in file_test_auto]
 
-    files = ['lab_indoor_1_full/out/automatic_annotations.csv', 'hospital3_static_full/out/automatic_annotations.csv']  # Replace with your file paths
-
-    file_list = [os.path.join(base_path, file) for file in files]
-
-    train_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="train")
-    val_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="val")
+    train_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="train", skeleton=True)
+    val_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="val", skeleton=True)
+    # test_dataset = PanoPosDataset(file_list_test, image_res=[3840, 1920], mode="test")
+    test_dataset_auto = PanoPosDataset(file_list_test_auto, image_res=[3840, 1920], mode="test", skeleton=True)
 
     #train_dataset.visualize_data()
 
     # Create data loaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0)
-
+    # test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True, num_workers=0)
+    test_loader_auto = DataLoader(test_dataset_auto, batch_size=1, shuffle=True, num_workers=0)
 
 
     # Initialize the MLP model, loss function, and optimizer
@@ -118,6 +123,7 @@ def train():
         # Print the loss for this epoch and validation loss
         print(f'Epoch [{epoch + 1}/{epochs}], Training Loss: {loss.item():.4f}, Validation Loss: {val_loss:.4f}')
 
+    '''
     with torch.no_grad():
         val_loss = 0.0
         for val_box, val_pos_2d in test_loader:
@@ -128,9 +134,11 @@ def train():
             val_loss += criterion(val_outputs, val_pos_2d).item()
 
     val_loss /= len(val_loader)  # Calculate the average validation loss
-
+    
     # Print the loss for this epoch and validation loss
     print(f'Test man Loss: {val_loss:.4f}')
+    '''
+
     with torch.no_grad():
         val_loss = 0.0
         for val_box, val_pos_2d in test_loader_auto:

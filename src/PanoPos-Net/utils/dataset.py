@@ -6,8 +6,74 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # Import the 3D plotting module
 
 
+def read_file_boxes(file_list, img_res):
+    data_list = []
+    for file in file_list:
+        with open(file, "r") as ann_file:
+            for line in ann_file:
+                s = line.split(";")
+                image = s[0]
+                data = s[1:]
+                for i in range(int(len(data) / 6)):
+                    person = data[i * 6:(i + 1) * 6]
+                    box = person[:4]
+                    centroid = person[4:]
+
+                    box = np.array(box).astype(np.float32)
+                    centroid = np.array(centroid).astype(np.float32)
+
+                    # Normalize box
+                    box[0] = box[0] / img_res[0]
+                    box[2] = box[2] / img_res[0]
+                    box[1] = box[1] / img_res[1]
+                    box[3] = box[3] / img_res[1]
+
+                    data_list.append((box, centroid))
+    return data_list
+
+def read_file_skeletons(file_list, img_res):
+    data_list = []
+
+    x_positions = list(range(0, 17*3, 3))
+    y_positions = list(range(1, 17*3, 3))
+    z_positions = list(range(2, 17*3, 3))
+
+    for file in file_list:
+        with open(file, "r") as ann_file:
+            for line in ann_file:
+                s = line.split(";")
+                image = s[0]
+                data = s[1:]
+                for i in range(int(len(data) / 57)):
+                    person = data[i * 57:(i + 1) * 57]
+                    box = person[:4]
+                    centroid = person[4:6]
+
+                    box = np.array(box).astype(np.float32)
+                    centroid = np.array(centroid).astype(np.float32)
+
+                    # Normalize box
+                    box[0] = box[0] / img_res[0]
+                    box[2] = box[2] / img_res[0]
+                    box[1] = box[1] / img_res[1]
+                    box[3] = box[3] / img_res[1]
+
+                    sk = np.array(person[6:]).astype(np.float32)
+
+                    '''
+                    x = sk[x_positions] / img_res[0]
+                    y = sk[y_positions] / img_res[1]
+                    c = sk[z_positions]
+
+                    sk = np.array([x,y,c])
+                    '''
+
+                    data_list.append((sk, centroid))
+    return data_list
+
+
 class PanoPosDataset(Dataset):
-    def __init__(self, file_list, image_res, mode="train", split_ratio=0.8, seed=None):
+    def __init__(self, file_list, image_res, mode="train", split_ratio=0.8, seed=None, skeleton=False):
         """
         Initialize the CustomDataset with a list of file paths.
 
@@ -29,27 +95,10 @@ class PanoPosDataset(Dataset):
 
         self.data_list = []  # the list contains tuples [box, centroid]
 
-        for file in self.file_list:
-            with open(file, "r") as ann_file:
-                for line in ann_file:
-                    s = line.split(";")
-                    image = s[0]
-                    data = s[1:]
-                    for i in range(int(len(data) / 6)):
-                        person = data[i * 6:(i + 1) * 6]
-                        box = person[:4]
-                        centroid = person[4:]
-
-                        box = np.array(box).astype(np.float32)
-                        centroid = np.array(centroid).astype(np.float32)
-
-                        # Normalize box
-                        box[0] = box[0] / self.img_res[0]
-                        box[2] = box[2] / self.img_res[0]
-                        box[1] = box[1] / self.img_res[1]
-                        box[3] = box[3] / self.img_res[1]
-
-                        self.data_list.append((box, centroid))
+        if skeleton:
+            self.data_list = read_file_skeletons(self.file_list, self.img_res)
+        else:
+            self.data_list = read_file_boxes(self.file_list, self.img_res)
 
         # Shuffle the data randomly
         # random.shuffle(self.data_list)

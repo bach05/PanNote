@@ -35,9 +35,12 @@ def calculate_iou(box1, box2):
 
 
 if __name__ == "__main__":
-    img_path = '/media/leonardo/Elements/lab_outdoor_1_2/img'  # replace this with your own image path
-    out_file = "/media/leonardo/Elements/lab_outdoor_1_2/out_skeleton.csv"
-    path_boxes = "/media/leonardo/Elements/lab_outdoor_1_2//automatic_annotations.csv"
+    base_path = '/media/leonardo/Elements/bag_extraction/hospital3_static'
+    img_path = os.path.join(base_path, 'img')  # replace this with your own image path
+    out_file = os.path.join(base_path, "out", "out_skeleton.csv")
+    path_boxes = os.path.join(base_path, "out", "automatic_annotations.csv")
+
+
     # instantiate the inferencer using the model alias
     inferencer = MMPoseInferencer('human')
 
@@ -91,9 +94,9 @@ if __name__ == "__main__":
                     centroid = centroids[k3]
                     prediction = predictions[ann_assosiations[k3]]
                     sk = np.array(prediction["keypoints"]).astype(str)
-                    conf = np.array(predictions[1]["keypoint_scores"]).astype(str)
+                    conf = np.array(prediction["keypoint_scores"]).astype(str)
 
-                    file_out.write(";"+box[0]+";"+box[1]+";"+box[2]+";"+box[3]+";"+centroid[0]+";"+centroid[1])
+                    file_out.write(";"+box[0]+";"+box[1]+";"+box[2]+";"+box[3]+";"+centroid[0]+";"+centroid[1][:-1])
                     for k4 in range(len(sk)):
                         file_out.write(";" +sk[k4, 0]+";" + sk[k4, 1]+";" + conf[k4])
 
