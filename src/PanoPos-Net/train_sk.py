@@ -1,3 +1,5 @@
+import copy
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -45,22 +47,40 @@ class MLP(nn.Module):
 
 def train():
 
-    input_dim = 17*3  # Change this to match your input dimension
-    layer_sizes = [64, 64]  # Specify the sizes of hidden layers
-    learning_rate = 0.0005
+    input_dim = 12*3 #17*3  # Change this to match your input dimension
+    layer_sizes = [32, 64, 128]  # Specify the sizes of hidden layers
+    learning_rate = 0.0001
     batch_size = 4
-    epochs = 400
+    epochs = 200
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Initialize your custom dataset
-    base_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction"
-    files_auto = ['/media/leonardo/Elements/annotation_pano/hospital3_static/out/out_skeleton.csv',
-                  '/media/leonardo/Elements/annotation_pano/lab_indoor_1/out/out_skeleton.csv']
-    file_test_auto = ["/media/leonardo/Elements/annotation_pano/lab_indoor_3_2/out/out_skeleton.csv"]
-    file_list = [os.path.join(base_path, file) for file in files_auto]
+    base_path = "/media/leonardo/Elements/bag_extraction"
+
+    file_train = [
+        'hospital3_static',
+        'lab_indoor_1',
+        'lab_indoor_3_2',
+    ]
+    file_train_full = [
+        'hospital3_static_full',
+        'lab_indoor_1_full',
+        'lab_indoor_3_2_full',
+    ]
+
+    file_test = [
+        'lab_outdoor_1_2'
+    ]
+
+    file_list_auto = [os.path.join(base_path, file, "out", "out_skeleton.csv") for file in file_train_full]
+    #file_list_man = [os.path.join(base_path, file, "annotations.csv") for file in file_train]
+    file_list_test_auto = [os.path.join(base_path, file, "out", "out_skeleton.csv") for file in file_test]
+    # file_list_test_man = [os.path.join(base_path, file, "annotations.csv") for file in file_test]
+
+    file_list = [os.path.join(base_path, file) for file in file_list_auto]
     #file_list_test = [os.path.join(base_path, file) for file in file_test_man]
-    file_list_test_auto = [os.path.join(base_path, file) for file in file_test_auto]
+    file_list_test_auto = [os.path.join(base_path, file) for file in file_list_test_auto]
 
     train_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="train", skeleton=True)
     val_dataset = PanoPosDataset(file_list, image_res=[3840, 1920], mode="val", skeleton=True)
@@ -83,12 +103,15 @@ def train():
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01)
 
     # Training loop
+    best_loss = 100
+    p = 0
+    best_model = None
     for epoch in range(epochs):
 
         train_loss = 0
         for box, pos_2d in (train_loader):
 
-            box = box.to(device)
+            box = box[:, -input_dim:].to(device)
             train_pos_2d = pos_2d.to(device)
 
             # Zero the gradients
@@ -112,7 +135,7 @@ def train():
         val_loss = 0.0
         with torch.no_grad():
             for val_box, val_pos_2d in val_loader:
-                val_box = val_box.to(device)
+                val_box = val_box[:, -input_dim:].to(device)
                 val_pos_2d = val_pos_2d.to(device)
 
                 val_outputs = model(val_box)
@@ -122,6 +145,18 @@ def train():
 
         # Print the loss for this epoch and validation loss
         print(f'Epoch [{epoch + 1}/{epochs}], Training Loss: {loss.item():.4f}, Validation Loss: {val_loss:.4f}')
+
+        if val_loss < best_loss:
+            p = 0
+            best_loss = val_loss
+            best_model = copy.deepcopy(model)
+        else:
+            p += 1
+
+        if p > 5:
+            break
+
+    model = best_model
 
     '''
     with torch.no_grad():
@@ -142,7 +177,7 @@ def train():
     with torch.no_grad():
         val_loss = 0.0
         for val_box, val_pos_2d in test_loader_auto:
-            val_box = val_box.to(device)
+            val_box = val_box[:,-input_dim:].to(device)
             val_pos_2d = val_pos_2d.to(device)
 
             val_outputs = model(val_box)

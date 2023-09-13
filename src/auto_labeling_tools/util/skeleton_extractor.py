@@ -35,7 +35,7 @@ def calculate_iou(box1, box2):
 
 
 if __name__ == "__main__":
-    base_path = '/media/leonardo/Elements/bag_extraction/hospital3_static'
+    base_path = '/media/leonardo/Elements/bag_extraction/lab_outdoor_1_2_full'
     img_path = os.path.join(base_path, 'img')  # replace this with your own image path
     out_file = os.path.join(base_path, "out", "out_skeleton.csv")
     path_boxes = os.path.join(base_path, "out", "automatic_annotations.csv")
