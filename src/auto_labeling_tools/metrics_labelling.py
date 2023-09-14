@@ -72,6 +72,7 @@ if __name__ == "__main__":
 
     distances = []
     correct_1 = 0
+    correct_075 = 0
     correct_05 = 0
     correct_025 = 0
     correct_010 = 0
@@ -111,16 +112,22 @@ if __name__ == "__main__":
                     distances.append(dist)
                     if dist < 0.10:
                         correct_1 += 1
+                        correct_075 += 1
                         correct_05 += 1
                         correct_025 += 1
                         correct_010 += 1
                     elif dist < 0.25:
                         correct_1 += 1
+                        correct_075 += 1
                         correct_05 += 1
                         correct_025 += 1
                     elif dist < 0.5:
                         correct_1 += 1
+                        correct_075 += 1
                         correct_05 += 1
+                    elif dist < 0.75:
+                        correct_1 += 1
+                        correct_075 += 1
                     elif dist < 1:
                         correct_1 += 1
 
@@ -137,6 +144,7 @@ if __name__ == "__main__":
 
     print("Mean error: ", np.mean(distances))
     print("Acc 1: ", correct_1/matched_boxes)
+    print("Acc 0.75: ", correct_075/matched_boxes)
     print("Acc 0.5: ", correct_05/matched_boxes)
     print("Acc 0.25: ", correct_025/matched_boxes)
     print("Acc 0.10: ", correct_010/matched_boxes)
@@ -149,6 +157,7 @@ if __name__ == "__main__":
         # Write the output to the file
         output_file.write(f"Mean error: {np.mean(distances)}\n")
         output_file.write(f"Acc 1: {correct_1 / matched_boxes}\n")
+        output_file.write(f"Acc 0.75: {correct_075 / matched_boxes}\n")
         output_file.write(f"Acc 0.5: {correct_05 / matched_boxes}\n")
         output_file.write(f"Acc 0.25: {correct_025 / matched_boxes}\n")
         output_file.write(f"Acc 0.10: {correct_010 / matched_boxes}\n")

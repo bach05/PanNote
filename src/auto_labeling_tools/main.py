@@ -11,17 +11,18 @@ mpl.use('TkAgg')
 
 from matplotlib import pyplot as plt, patches
 import time
+import gc
 
 import sys
 sys.path.append('..')
 
 import detect_people
-from src.auto_calibration_tools.scripts.camera_laser_calibration.calibrateCamera2LaserPnP import projectPoint2Image
-from src.auto_labeling_tools.util.cube_projection import from_cube2panoramic
-from src.auto_labeling_tools.util.image_detector import ImageDetector
-from src.auto_labeling_tools.util.laser_detector import LaserDetector
-from src.auto_labeling_tools.util.visualization import plot_scans, plot_detection
-from src.auto_labeling_tools.util.cube_projection import CubeProjection
+from auto_calibration_tools.scripts.camera_laser_calibration.calibrateCamera2LaserPnP import projectPoint2Image
+from auto_labeling_tools.util.cube_projection import from_cube2panoramic
+from auto_labeling_tools.util.image_detector import ImageDetector
+from auto_labeling_tools.util.laser_detector import LaserDetector
+from auto_labeling_tools.util.visualization import plot_scans, plot_detection
+from auto_labeling_tools.util.cube_projection import CubeProjection
 
 
 def read_scan(path):
@@ -45,7 +46,7 @@ if __name__ == "__main__":
     #path_bag = "/media/leonardo/Elements/bag/hospital1_static.bag"
     # t_laser = "/scan"
     # t_img = "/theta_camera/image_raw"
-    path_out = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/hospital3_static_full" #read processed bag
+    path_out = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/lab_indoor_3_2_full" #read processed bag
 
     out_path_scans = os.path.join(path_out, "out/img_out") #visualization
     out_path_det =  os.path.join(path_out, "out/yolo_out") #visualization
@@ -113,6 +114,9 @@ if __name__ == "__main__":
     start_time = time.time()
     for i in range(0, len(ids)):
 
+        # if i < 93:
+        #     continue
+
         scan = scans[i]
         id = ids[i]
         image_index = str(id).zfill(4)
@@ -173,6 +177,11 @@ if __name__ == "__main__":
 
         '''
 
+        if len(rep_detections) == 0:
+            print(f"**** No people detect in the image, skipping img {image_index}")
+            file_annotation.write(image_index)
+            continue
+
         box_init = rep_detections[:, 0]
         box_end = rep_detections[:, 2]
 
@@ -230,7 +239,10 @@ if __name__ == "__main__":
         #rep_image = cv2.rectangle(rep_image, det[:2], det[2:], (255, 0, 0), 5)
 
         plt.savefig(osp.join(out_path_associations, image_index+".png"))
+        fig.clf()
         plt.close()
+        del fig
+        gc.collect
 
         file_annotation.write(image_index)
         for e in range(len(centroids)):

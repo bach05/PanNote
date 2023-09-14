@@ -191,7 +191,7 @@ class ClickHandler:
 def main():
 
     # Define the folder path
-    folder_path = "/media/leonardo/Elements/lab_outdoor_1_2/"
+    folder_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction/motion_lab1_small"
 
 
 
@@ -212,7 +212,7 @@ def main():
     file_path = "../auto_calibration_tools/scripts/camera_laser_calibration/laser2camera_map.pkl"
 
     # ouput path
-    out_file = os.path.join(folder_path, "manual_ann_lab_indoor_3_2.csv")
+    out_file = os.path.join(folder_path, "motion_lab1.csv")
     if os.path.exists(out_file):
         file_annotation = open(out_file, "a")
     else:
@@ -237,7 +237,7 @@ def main():
 
     for index, row in scan_df.iterrows():
 
-        # if index < 30:
+        # if index < 50:
         #     continue
 
 

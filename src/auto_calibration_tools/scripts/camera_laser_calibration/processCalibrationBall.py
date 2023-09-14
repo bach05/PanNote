@@ -142,6 +142,9 @@ class Plotter:
         self.figure, self.axes = plt.subplots(subplot_shape[0], subplot_shape[1], figsize=(16, 12))
         self.current_subplot_index = 0
 
+        for ax in self.axes:
+            ax.axis("off")
+
     def getSubplot(self, index):
         if index < 1 or index > self.subplot_shape[0] * self.subplot_shape[1]:
             raise ValueError("Invalid subplot index")
@@ -333,7 +336,11 @@ class ImagePointFinder:
 
         if verbose and self.plot is not None:
             self.plot.imshow(image)
+            # Plot the bounding box
+            rect = plt.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, edgecolor='blue', facecolor='none')
+            self.plot.add_patch(rect)
             self.plot.scatter(center_x, center_y, color="red")
+
 
         return [None, center_x, center_y]
 
@@ -513,7 +520,7 @@ class LaserPointFinder:
 
                 if roi.shape[0] > self.num_point:
 
-                    self.plot.scatter(roi[:, 0], roi[:, 1], c='red', marker='x', alpha=0.75)
+                    self.plot.scatter(roi[:, 0], roi[:, 1], c='blue', marker='x', alpha=0.75)
 
                     initial_guess = [np.mean(roi[:, 0]), np.mean(roi[:, 1]), self.diameter/2]
                     (center_x, center_y, radius), cost = self.fit_circle(roi, initial_guess)
@@ -558,6 +565,7 @@ class LaserPointFinder:
                 circle = patches.Circle((xc, yc), radius, fill=False, color='blue')
                 self.plot.add_patch(circle)
                 self.plot.set_aspect('equal')
+                self.plot.scatter(xc, yc, color="red")
 
                 return (xc, yc, zc)
 
@@ -705,7 +713,7 @@ def main():
 
             plotter.clear()
 
-            if i%50 == 0:
+            if (i+1)%50 == 0:
 
                 # Specify the file path where you want to save the dictionary
                 file_path = "cameraLaser_pointsUHD_ball_static_i.pkl"

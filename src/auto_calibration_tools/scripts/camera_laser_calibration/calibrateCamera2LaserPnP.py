@@ -134,29 +134,41 @@ def correctU2(H, x_3d, y_3d):
 
     return correction_u
 
-def distErr(H, gt_u, pred_u, x_3d, y_3d):
+def predictU3(H, x_3d, y_3d):
+
+    theta, scale, offset, tx, ty = H
+    t = 0.5*(rotated_arctan2(x_3d+tx, y_3d+ty, theta) / (np.pi) + 1)
+    correction_u = scale *(t + offset)
+
+    #correction_u = rotated_arctan2(x_3d, y_3d, np.pi/2) / (np.pi) + 1.0
+
+    return correction_u
+
+def distErr(H, gt_u, pred_u, x_3d, y_3d, pred_type = 2):
 
     if pred_u is not None:
         correct_u = correctU(H, pred_u, x_3d, y_3d)
-    else:
+    elif pred_type == 2:
         theta, scale, offset = H
         t = rotated_arctan2(x_3d, y_3d, theta) / (np.pi) + offset
         correct_u = t * scale
+    elif pred_type == 3:
+        correct_u = predictU3(H, x_3d, y_3d)
 
     error = periodicDist(correct_u, gt_u)
 
     return error.mean()
 
-def optimize(H0, gt_u, pred_u, x_3d, y_3d, error_function = distErr):
+def optimize(H0, gt_u, pred_u, x_3d, y_3d, error_function = distErr, pred_type=2):
 
-    optimization_function = lambda H: error_function(H, gt_u, pred_u, x_3d, y_3d)
+    optimization_function = lambda H: error_function(H, gt_u, pred_u, x_3d, y_3d, pred_type)
     result = minimize(optimization_function, H0, method='Nelder-Mead')
 
     optimized_H = result.x
     optimized_error = result.fun
 
-    print("Optimization res: ", result.success)
-    print("Message: ", result.message)
+    #print("Optimization res: ", result.success)
+    #print("Message: ", result.message)
 
     return optimized_H, optimized_error
 
@@ -350,6 +362,7 @@ if __name__ == '__main__':
 
     #use argtan 2 directly
     H0g = (np.pi / 2, 3840 / 2, 1.0)
+
     H2, _ = optimize(H0g, points_2d[0, :, 0], None, points_3d[0, :, 0], points_3d[0, :, 1])
 
     pred_H2 = correctU2(H2, points_3d[0, :, 0], points_3d[0, :, 1])
@@ -358,6 +371,36 @@ if __name__ == '__main__':
     pred_H2[mask] = pred_H2[mask] % 3839
     mask = pred_H2 < 0
     pred_H2[mask] = pred_H2[mask] + 3840
+
+    #USE H3 with initialization
+
+    S = 3840
+    atans = np.arctan2(points_3d[0, :, 0], points_3d[0, :, 1])
+
+    best_error = np.inf
+    best_H3 = [0,0,0,0,0]
+
+    for alpha in [0.5, 0.4, 0.3, 0.2, 0.1, 0.0, -0.1, -0.2, -0.3, -0.4, -0.5]:
+        for theta in np.array([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])*np.pi:
+
+            H0g = (theta, S, alpha, 0 , 0)
+            H3, _ = optimize(H0g, points_2d[0, :, 0], None, points_3d[0, :, 0], points_3d[0, :, 1], pred_type=3)
+
+            pred_H3 = predictU3(H3, points_3d[0, :, 0], points_3d[0, :, 1])
+
+            mask = pred_H3 > 3839
+            pred_H3[mask] = pred_H3[mask] % 3839
+            mask = pred_H3 < 0
+            pred_H3[mask] = pred_H3[mask] + 3840
+
+            error = periodicDist(pred_H3, points_2d[0, :, 0]).mean()
+
+            if error < best_error and error >= 0:
+                best_error = error
+                best_H3 = H3
+
+
+    H3 = best_H3
 
 
     for i, (laser_p, image_p) in enumerate(zip(points_3d[0], points_2d[0])):
@@ -404,6 +447,10 @@ if __name__ == '__main__':
     pred = projectPoint2Image(laser_point=laser_points[0],H=H2)
     error = periodicDist(pred,  points_2d[0,:,0])
     print(f"REPROJECTION ERROR X H2 =  {H2}: {(error.mean())}")
+
+    pred = predictU3(H3, points_3d[0, :, 0], points_3d[0, :, 1])
+    error = periodicDist(pred, points_2d[0, :, 0])
+    print(f"REPROJECTION ERROR X H3 =  {H3}: {(error.mean())}")
 
     reprojected_laser = projectImage2Point(pred, H2)
     error = np.linalg.norm(reprojected_laser - points_3d[0,:,:2], axis=1).mean()
@@ -486,13 +533,13 @@ if __name__ == '__main__':
     }
 
     # Specify the file path where you want to save the dictionary
-    file_path = "laser2camera_map.pkl"
-
-    # save dictionary to person_data.pkl file
-    with open(file_path, 'wb') as fp:
-        pickle.dump(results, fp)
-        print('Dictionary saved successfully to file')
-
-    print(f"Laser to Camera calibration results saved to {file_path}")
+    # file_path = "laser2camera_map.pkl"
+    #
+    # # save dictionary to person_data.pkl file
+    # with open(file_path, 'wb') as fp:
+    #     pickle.dump(results, fp)
+    #     print('Dictionary saved successfully to file')
+    #
+    # print(f"Laser to Camera calibration results saved to {file_path}")
 
 

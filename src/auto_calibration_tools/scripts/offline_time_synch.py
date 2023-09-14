@@ -51,7 +51,7 @@ class SynchNode:
         self.scan_sub = Subscriber("/scan2", LaserScan, queue_size=30)
 
         # Synchronize the messages from both topics
-        self.sync = ApproximateTimeSynchronizer([self.image_sub, self.scan_sub], queue_size=30, slop=0.04)
+        self.sync = ApproximateTimeSynchronizer([self.image_sub, self.scan_sub], queue_size=30, slop=0.2)
         self.sync.registerCallback(self.callback)
 
         self.image_count = 0
@@ -79,7 +79,7 @@ class SynchNode:
         ts_laser = scan_msg.header.stamp.to_sec()
 
         if self.image_count % self.save_step == 0:
-            #print(f"***RECEIVED {self.image_count}:\nL [{ts_laser}]\nC [{ts_img}]\ndelta L-C {ts_laser-ts_img} ")
+            print(f"***RECEIVED {self.image_count}:\nL [{ts_laser}]\nC [{ts_img}]\ndelta L-C {ts_laser-ts_img} ")
             # image_filename = str(self.image_count).zfill(4)+ '.png'
             # image_path = os.path.join(self.save_root, "img", image_filename)
             # cv2.imwrite(image_path, image_data)

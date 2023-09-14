@@ -1,13 +1,13 @@
 <launch>
 
   <!-- Specify the out folder name -->
-  <arg name="save_dir" default="$(find auto_calibration_tools)/bag_extraction/lab_indoor_2_2_full"/>
-  <arg name="save_step" default="1"/>
+  <arg name="save_dir" default="$(find auto_calibration_tools)/bag_extraction/motion_lab1_small"/>
+  <arg name="save_step" default="5"/>
 
 
   <!-- Specify the directory where you want to save the bag file -->
   <arg name="bag_dir" default="$(find auto_calibration_tools)/bags"/>
-  <arg name="input_bag_file" default="lab_indoor_2_2.bag" />
+  <arg name="input_bag_file" default="motion_lab1_2.bag" />
 
       <!-- Declare the node -->
   <node

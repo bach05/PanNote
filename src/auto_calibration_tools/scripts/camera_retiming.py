@@ -8,7 +8,8 @@ def scan_callback(original_image):
     # Create a new LaserScan message with a different header
     new_scan = Image()
     new_scan = original_image
-    new_scan.header.stamp = rospy.Time.now() - rospy.Duration(1.011) # Use the current time as the new timestamp
+    #new_scan.header.stamp = rospy.Time.now() - rospy.Duration(1.011) # Use the current time as the new timestamp
+    new_scan.header.stamp = rospy.Time.now() - rospy.Duration(1.311) # Use the current time as the new timestamp
 
     # Publish the new scan message on the \scan2 topic
     scan2_publisher.publish(new_scan)
