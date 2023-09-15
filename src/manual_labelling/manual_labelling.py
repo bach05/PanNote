@@ -240,7 +240,6 @@ def main():
         # if index < 50:
         #     continue
 
-
         # Split the input string by comma and remove leading/trailing whitespace
         row = row[0].split(',')
 

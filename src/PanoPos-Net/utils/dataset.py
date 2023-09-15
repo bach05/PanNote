@@ -108,9 +108,9 @@ class PanoPosDataset(Dataset):
 
         # Split the data_list into train and val based on split_ratio
         #split_index = int(split_ratio * len(self.data_list))
-        self.train_data = np.array(self.data_list)[split_train]
-        self.val_data = np.array(self.data_list)[split_val]
-        self.test_data = np.array(self.data_list)
+        self.train_data = [self.data_list[k] for k in split_train]
+        self.val_data = [self.data_list[k] for k in split_train]
+        self.test_data = self.data_list
 
         if self.mode == "train":
             self.data = self.train_data

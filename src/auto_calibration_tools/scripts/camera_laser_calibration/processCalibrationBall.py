@@ -337,9 +337,9 @@ class ImagePointFinder:
         if verbose and self.plot is not None:
             self.plot.imshow(image)
             # Plot the bounding box
-            rect = plt.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, edgecolor='blue', facecolor='none')
+            rect = plt.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=4, edgecolor='red', facecolor='none')
             self.plot.add_patch(rect)
-            self.plot.scatter(center_x, center_y, color="red")
+            self.plot.scatter(center_x, center_y, color="magenta")
 
 
         return [None, center_x, center_y]
@@ -465,7 +465,7 @@ class LaserPointFinder:
 
         # Plot the laser scan data
         if verbose and self.plot is not None:
-            self.plot.scatter(points[:, 0], points[:, 1], c='orange', marker='x', alpha=0.5)
+            self.plot.scatter(points[:, 0], points[:, 1], c='cyan', marker='x', alpha=0.5)
             # self.plot.scatter(self.template[:, 0], self.template[:, 1], c='purple', marker='1')
 
 
@@ -520,7 +520,7 @@ class LaserPointFinder:
 
                 if roi.shape[0] > self.num_point:
 
-                    self.plot.scatter(roi[:, 0], roi[:, 1], c='blue', marker='x', alpha=0.75)
+                    self.plot.scatter(roi[:, 0], roi[:, 1], c='red', marker='x', alpha=0.75)
 
                     initial_guess = [np.mean(roi[:, 0]), np.mean(roi[:, 1]), self.diameter/2]
                     (center_x, center_y, radius), cost = self.fit_circle(roi, initial_guess)
@@ -562,10 +562,10 @@ class LaserPointFinder:
 
                 print(f"CIRCLE DETECTION: xc {xc}, yc {yc}, r {radius}, cont {count}")
 
-                circle = patches.Circle((xc, yc), radius, fill=False, color='blue')
+                circle = patches.Circle((xc, yc), radius, fill=False, color='red')
                 self.plot.add_patch(circle)
                 self.plot.set_aspect('equal')
-                self.plot.scatter(xc, yc, color="red")
+                self.plot.scatter(xc, yc, color="magenta")
 
                 return (xc, yc, zc)
 
