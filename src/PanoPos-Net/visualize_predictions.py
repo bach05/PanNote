@@ -336,7 +336,11 @@ if __name__ == "__main__":
         # Plot the image in the first subplot
         ax1.imshow(image)
         ax1.axis('off')  # Turn off axis labels and ticks
-
+        # Turn off tick labels
+        ax2.set_yticklabels([])
+        ax2.set_xticklabels([])
+        ax2.xaxis.set_ticks_position('none')
+        ax2.yaxis.set_ticks_position('none')
         boxes_image = boxes[np.where(images == image_n)]
         poses_image = poses[np.where(images == image_n)]
 
@@ -369,7 +373,7 @@ if __name__ == "__main__":
                 #ax2.scatter(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], marker="^", color=colors[bn], s=80, alpha=0.75)
                 #obj = ax2.scatter(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], marker="^", color=None, s=80, alpha=1, edgecolors='b')
                 #obj.set_facecolor=("none")
-                ax2.plot(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], '_', ms=10, markerfacecolor="orange", markeredgecolor=colors[bn],  markeredgewidth=2)
+                ax2.plot(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], '_', ms=14, markerfacecolor="orange", markeredgecolor=colors[bn],  markeredgewidth=2)
             index_man = np.where((boxes_image[:, 0, 0] == box[0, 0]) &
                                   (boxes_image[:, 0, 1] == box[0, 1]) &
                                   (boxes_image[:, 0, 2] == box[0, 2]) &
@@ -380,7 +384,7 @@ if __name__ == "__main__":
                 #ax2.scatter(poses_image[index_man, 0], poses_image[index_man, 1], marker="s", color=colors[bn], s=80, alpha=0.75)
                 #obj = ax2.scatter(poses_image[index_man, 0], poses_image[index_man, 1], marker="s", color=None, s=80, alpha=1, edgecolors='b')
                 #obj.set_facecolor=("none")
-                ax2.plot(poses_image[index_man, 0], poses_image[index_man, 1], '|', ms=10, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=2)
+                ax2.plot(poses_image[index_man, 0], poses_image[index_man, 1], '|', ms=14, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=2)
 
             top_left = box[0, :2] * [3840, 1920]
             bottom_right = box[0, 2:] * [3840, 1920]
@@ -395,11 +399,11 @@ if __name__ == "__main__":
 
             torch_box = torch.tensor(box).cuda()
             prediction = model(torch_box).detach().cpu().numpy()[0]
-            ax2.plot(prediction[0], prediction[1], 'x', ms=10, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=2)
+            ax2.plot(prediction[0], prediction[1], 'x', ms=14, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=2)
         #plt.setp(ax2, xlim=[m[0], M[0]], ylim=[m[1], M[1]])
         ax2.set_xlim(m[0]-1, M[0]+1)
         ax2.set_ylim(m[1]-1, M[1]+1)
-        plt.subplots_adjust(left=0, bottom=0.033, right=1, top=0.97, wspace=0.03, hspace=None)
+        plt.subplots_adjust(left=0, bottom=0.05, right=0.98, top=0.90, wspace=0.03, hspace=None)
 
 
 
@@ -413,6 +417,7 @@ if __name__ == "__main__":
         #ax2.axis('equal')
         # Plot horizontal x-axis (red line)
         ax2.grid()
+        #plt.show()
         plt.savefig(out_path+image_n+".png")
         plt.close()
 
