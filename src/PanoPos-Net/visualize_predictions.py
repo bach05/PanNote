@@ -6,13 +6,15 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from matplotlib import pyplot as plt, patches
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.auto_labeling_tools.util.laser_detector import convert_to_coordinates
 import os
+
+import matplotlib as mpl
+
 
 # Define your MLP model
 class MLP(nn.Module):
@@ -266,9 +268,14 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    out_path = "/home/leonardo/Downloads/save_images/"
+    path_model = "/home/leonardo/Downloads/saved_models/full/MLP_train_testFold-lab_outdoor_1_2.pth"
+    model = MLP(input_dim, layer_sizes).to(device)
+    model.load_state_dict(torch.load(path_model))
+    model.cuda()
+
     # Initialize your custom dataset
     base_path = "/media/leonardo/Elements/bag_extraction"
-
     files = ['hospital3_static', 'lab_indoor_1', 'lab_indoor_3_2', 'lab_outdoor_1_2']
     file_test = ['lab_outdoor_1_2']
     file_list_test_auto = [os.path.join(base_path, file, "out", "automatic_annotations.csv") for file in file_test]
@@ -324,7 +331,7 @@ if __name__ == "__main__":
         scan_for_image = scans[scan_index]
         points, polar = convert_to_coordinates(scan_for_image, laser_spec, remove_out=True)
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 9))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 5))
 
         # Plot the image in the first subplot
         ax1.imshow(image)
@@ -334,10 +341,47 @@ if __name__ == "__main__":
         poses_image = poses[np.where(images == image_n)]
 
         boxes_image_auto = boxes_auto[np.where(images_auto == image_n)]
-        poses_image_auto = poses_auto[np.where(images == image_n)]
-        poses_image_auto= poses_image_auto[:, 0]
-        poses_image= poses_image[:, 0]
-        for box in boxes_image:
+        poses_image_auto = poses_auto[np.where(images_auto == image_n)]
+        poses_image_auto = poses_image_auto[:, 0]
+        poses_image = poses_image[:, 0]
+
+        M = np.max(np.concatenate((poses_image, poses_image_auto)), axis=0)
+        m = np.min(np.concatenate((poses_image, poses_image_auto)), axis=0)
+
+
+
+        total_boxes = np.concatenate((boxes_image, boxes_image_auto))
+        total_boxes = np.unique(total_boxes, axis=0)
+
+        colors = mpl.cm.rainbow(np.linspace(0, 1, len(total_boxes)))
+        ax2.scatter(points[:, 0], points[:, 1], marker=".", color="black", s=20, alpha=0.7)
+
+
+        for bn, box in enumerate(total_boxes):
+            index_auto = np.where((boxes_image_auto[:, 0, 0] == box[0, 0]) &
+                     (boxes_image_auto[:, 0, 1] == box[0, 1]) &
+                     (boxes_image_auto[:, 0, 2] == box[0, 2]) &
+                     (boxes_image_auto[:, 0, 3] == box[0, 3]))
+
+            if len(index_auto[0]) > 0:
+                index_auto = index_auto[0][0]
+
+                #ax2.scatter(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], marker="^", color=colors[bn], s=80, alpha=0.75)
+                #obj = ax2.scatter(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], marker="^", color=None, s=80, alpha=1, edgecolors='b')
+                #obj.set_facecolor=("none")
+                ax2.plot(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], '_', ms=10, markerfacecolor="orange", markeredgecolor=colors[bn],  markeredgewidth=2)
+            index_man = np.where((boxes_image[:, 0, 0] == box[0, 0]) &
+                                  (boxes_image[:, 0, 1] == box[0, 1]) &
+                                  (boxes_image[:, 0, 2] == box[0, 2]) &
+                                  (boxes_image[:, 0, 3] == box[0, 3]))
+
+            if len(index_man[0]) > 0:
+                index_man = index_man[0][0]
+                #ax2.scatter(poses_image[index_man, 0], poses_image[index_man, 1], marker="s", color=colors[bn], s=80, alpha=0.75)
+                #obj = ax2.scatter(poses_image[index_man, 0], poses_image[index_man, 1], marker="s", color=None, s=80, alpha=1, edgecolors='b')
+                #obj.set_facecolor=("none")
+                ax2.plot(poses_image[index_man, 0], poses_image[index_man, 1], '|', ms=10, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=2)
+
             top_left = box[0, :2] * [3840, 1920]
             bottom_right = box[0, 2:] * [3840, 1920]
 
@@ -346,36 +390,31 @@ if __name__ == "__main__":
 
             top_left[1] = bottom_right[1]
 
-            rectangle = patches.Rectangle(top_left, width, height, linewidth=3, edgecolor='red', facecolor='none')
-
+            rectangle = patches.Rectangle(top_left, width, height, linewidth=3, edgecolor=colors[bn], facecolor='none')
             ax1.add_patch(rectangle)
 
-        for box in boxes_image_auto:
-            top_left = box[0, :2] * [3840, 1920]
-            bottom_right = box[0, 2:] * [3840, 1920]
+            torch_box = torch.tensor(box).cuda()
+            prediction = model(torch_box).detach().cpu().numpy()[0]
+            ax2.plot(prediction[0], prediction[1], 'x', ms=10, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=2)
+        #plt.setp(ax2, xlim=[m[0], M[0]], ylim=[m[1], M[1]])
+        ax2.set_xlim(m[0]-1, M[0]+1)
+        ax2.set_ylim(m[1]-1, M[1]+1)
+        plt.subplots_adjust(left=0, bottom=0.033, right=1, top=0.97, wspace=0.03, hspace=None)
 
-            width = bottom_right[0] - top_left[0]
-            height = top_left[1] - bottom_right[1]
 
-            top_left[1] = bottom_right[1]
-
-            rectangle = patches.Rectangle(top_left, width, height, linewidth=3, edgecolor='red', facecolor='none')
-
-            ax1.add_patch(rectangle)
 
         # Plot the laser scan data in the second subplot
-        ax2.scatter(points[:, 0], points[:, 1], marker="o", color="orange", s=4)
-        ax2.scatter(poses_image[:, 0], poses_image[:, 1], marker="x", color="blue", s=6)
-        ax2.scatter(poses_image_auto[:, 0], poses_image_auto[:, 1], marker="x", color="red", s=6)
+
+        #ax2.scatter(poses_image_auto[:, 0], poses_image_auto[:, 1], marker="s", color="red", s=6)
 
 
 
         ax2.set_title("Laser Scan Data")
-        ax2.axis('equal')
+        #ax2.axis('equal')
         # Plot horizontal x-axis (red line)
         ax2.grid()
-        plt.show()
-
+        plt.savefig(out_path+image_n+".png")
+        plt.close()
 
     # Add the rectangle patch to the axis
 
