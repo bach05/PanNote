@@ -529,7 +529,8 @@ if __name__ == '__main__':
     plt.show()
 
     results = {
-        "H2":H2
+        "H2":H2,
+        "H3":H3
     }
 
     # Specify the file path where you want to save the dictionary

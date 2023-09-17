@@ -104,6 +104,8 @@ src/manual_labelling/synch2/
 src/auto_calibration_tools/bag_extraction/
 
 src/PanoPos-Net/saved_models.zip
+src/PanoPos-Net/save_images/
+
 
 __pycache__/*
 */__pycache__

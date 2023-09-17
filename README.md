@@ -1,3 +1,80 @@
+# PanNote
+
+This repository have been build with the contribution of [sepideh-shamsizadeh](https://github.com/sepideh-shamsizadeh) and [leobarcellona](https://github.com/leobarcellona). 
+For any issues or problems, feel free to contact us. 
+# Easy Start Up
+
+Here you will find some quick startup examples. 
+
+## 1. Collect data 
+
+To collect data, you can use our launch file (tested on ROS Noetic). You may need to update paths and topic names.
+```
+roslaunch auto_calibration_tools acquireCalibrationData.launch
+```
+We advise to use a big size ball (radius > 50 cm). We integrate an audio feedback to facilitate the acquisition. For better accuracy, we advise to listen to the audio feedback and stop moving just before the acquisition of the data. 
+
+## 2. Train the ball detector
+The ball is detected automatically in the image wih one shot detector. You can train it with:
+
+```commandline
+cd AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration
+python3 train_ball_detector.py
+```
+The scripts read images from `backgrounds_UHD/` folder and `target_ball.png` to train a one-shot detector. Default test folder is `images_UHD_ball_indoor2/`.
+
+## 3. Run calibration with the ball
+
+```commandline
+cd AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration
+python3 processCalibrationBall.py
+```
+This step extracts features from each image and laser scan couple. The results are saved into `cameraLaser_pointsUHD_ball_pano_i.pkl`. The data are read from `imagesUHD_ball_400i/` folder.
+
+```commandline
+cd AutoLabeling/src/auto_calibration_tools/scripts/camera_laser_calibration
+python3 calibrateCamera2LaserPnP.py
+```
+is used to calibrate the panoramic image with the laser. The final output is a dictionary like: 
+
+```python
+    results = {
+        "H2":H2,
+        "H3":H3
+    }
+```
+saved into `laser2camera_map.pkl`. You can use H2 to feed the function `projectPoint2Image(laser_point, H)` or H3 with the function `predictU3(H, x_3d, y_3d)` to map laser points into the panoramic image. 
+
+## 4. Collect data for labelling
+To collect data to be labelled, you can use our launch file (tested in ROS Noetic). Ensure the camere is turned on. You may need to update paths and topic names.
+```
+roslaunch auto_calibration_tools recordBag.launch bag_filename:=bag_name
+```
+Then, you process your own bag with:
+```
+roslaunch auto_calibration_tools extract_from_bag.launch save_step:=15 save_dir:=folder
+```
+The processing will extract images and laser scans in `auto_calibration_tools/bag_extraction/folder`.
+
+## 5. Automatic label the data
+To annotate the images extract in step 4, you can run: 
+```commandline
+cd AutoLabeling/src/auto_labelling_tools
+python3 main.py
+```
+You may need to update the paths. Annotations are saved in `out/automatic_annotations.csv` file. 
+
+## Train a baseline model and test 
+```commandline
+cd AutoLabeling/src/auto_labelling_tools
+python3 train_2.py
+```
+To train the model, you can feed the folders containing the labelled data. You may need to update paths. Test runs automatically after training in the specified folder. 
+___________________________________________
+
+In the following more detailed instrutions on how to use the repository. 
+
+
 # STARTUP THE CAMERA
 
 ## Install drivers (only for 1st installation)

@@ -12,6 +12,7 @@ from tqdm import tqdm
 
 from src.auto_labeling_tools.util.laser_detector import convert_to_coordinates
 import os
+from tqdm import tqdm
 
 import matplotlib as mpl
 
@@ -178,9 +179,9 @@ class PanoPosDataset(Dataset):
 
         # Split the data_list into train and val based on split_ratio
         #split_index = int(split_ratio * len(self.data_list))
-        self.train_data = np.array(self.data_list)[split_train]
-        self.val_data = np.array(self.data_list)[split_val]
-        self.test_data = np.array(self.data_list)
+        self.train_data = [self.data_list[k] for k in split_train]
+        self.val_data = [self.data_list[k] for k in split_train]
+        self.test_data =[self.data_list[k] for k in range(len(self.data_list))]
 
         if self.mode == "train":
             self.data = self.train_data
@@ -268,16 +269,30 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    out_path = "/home/leonardo/Downloads/save_images/"
-    path_model = "/home/leonardo/Downloads/saved_models/full/MLP_train_testFold-lab_outdoor_1_2.pth"
+    base_path_out = "./save_images/"
+    if not os.path.exists(base_path_out):
+        os.makedirs(base_path_out)
+        print(f"Folder '{base_path_out}' created.")
+    else:
+        print(f"Folder '{base_path_out}' already exists.")
+
+    # Initialize your custom dataset
+    base_path = "/home/iaslab/ROS_AUTOLABELLING/AutoLabeling/src/auto_calibration_tools/bag_extraction"
+    files = ['hospital3_static', 'lab_indoor_1', 'lab_indoor_3_2', 'lab_outdoor_1_2']
+    file_test = ['lab_indoor_3_2']
+
+    out_path = os.path.join(base_path_out,file_test[0])
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+        print(f"Folder '{out_path}' created.")
+    else:
+        print(f"Folder '{out_path}' already exists.")
+
+    path_model = f"./saved_models/full/MLP_train_testFold-{file_test[0]}.pth"
     model = MLP(input_dim, layer_sizes).to(device)
     model.load_state_dict(torch.load(path_model))
     model.cuda()
 
-    # Initialize your custom dataset
-    base_path = "/media/leonardo/Elements/bag_extraction"
-    files = ['hospital3_static', 'lab_indoor_1', 'lab_indoor_3_2', 'lab_outdoor_1_2']
-    file_test = ['lab_outdoor_1_2']
     file_list_test_auto = [os.path.join(base_path, file, "out", "automatic_annotations.csv") for file in file_test]
     file_list_test_man = [os.path.join(base_path, file, "annotations.csv") for file in file_test]
 
@@ -322,7 +337,7 @@ if __name__ == "__main__":
 
     scans, ids = read_scan(path + "/laser.csv")
 
-    for image_n in np.unique(images):
+    for image_n in tqdm(np.unique(images)):
         image_path = path + "/img/" + image_n+ ".png"
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -357,8 +372,11 @@ if __name__ == "__main__":
         total_boxes = np.concatenate((boxes_image, boxes_image_auto))
         total_boxes = np.unique(total_boxes, axis=0)
 
-        colors = mpl.cm.rainbow(np.linspace(0, 1, len(total_boxes)))
-        ax2.scatter(points[:, 0], points[:, 1], marker=".", color="black", s=20, alpha=0.7)
+        #colors = mpl.cm.rainbow(np.linspace(0, 1, len(total_boxes)))
+        colors = ["#f55657", "#f5c538", "#83c124", "#1a7abb", "#684a8c", "#b09fc0"]
+        ms = 30
+        lw = 5
+        ax2.scatter(points[:, 0], points[:, 1], marker=".", color="black", s=20, alpha=0.5)
 
 
         for bn, box in enumerate(total_boxes):
@@ -373,7 +391,7 @@ if __name__ == "__main__":
                 #ax2.scatter(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], marker="^", color=colors[bn], s=80, alpha=0.75)
                 #obj = ax2.scatter(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], marker="^", color=None, s=80, alpha=1, edgecolors='b')
                 #obj.set_facecolor=("none")
-                ax2.plot(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], '_', ms=14, markerfacecolor="orange", markeredgecolor=colors[bn],  markeredgewidth=2)
+                ax2.plot(poses_image_auto[index_auto, 0], poses_image_auto[index_auto, 1], '_', ms=ms, markerfacecolor=(0,0,0,0), markeredgecolor=colors[bn],  markeredgewidth=lw)
             index_man = np.where((boxes_image[:, 0, 0] == box[0, 0]) &
                                   (boxes_image[:, 0, 1] == box[0, 1]) &
                                   (boxes_image[:, 0, 2] == box[0, 2]) &
@@ -384,7 +402,7 @@ if __name__ == "__main__":
                 #ax2.scatter(poses_image[index_man, 0], poses_image[index_man, 1], marker="s", color=colors[bn], s=80, alpha=0.75)
                 #obj = ax2.scatter(poses_image[index_man, 0], poses_image[index_man, 1], marker="s", color=None, s=80, alpha=1, edgecolors='b')
                 #obj.set_facecolor=("none")
-                ax2.plot(poses_image[index_man, 0], poses_image[index_man, 1], '|', ms=14, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=2)
+                ax2.plot(poses_image[index_man, 0], poses_image[index_man, 1], '|', ms=ms, markerfacecolor=colors[bn], markeredgecolor=colors[bn], markeredgewidth=lw)
 
             top_left = box[0, :2] * [3840, 1920]
             bottom_right = box[0, 2:] * [3840, 1920]
@@ -399,7 +417,7 @@ if __name__ == "__main__":
 
             torch_box = torch.tensor(box).cuda()
             prediction = model(torch_box).detach().cpu().numpy()[0]
-            ax2.plot(prediction[0], prediction[1], 'x', ms=14, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=2)
+            ax2.plot(prediction[0], prediction[1], 'x', ms=ms, markerfacecolor="blue", markeredgecolor=colors[bn], markeredgewidth=lw-1)
         #plt.setp(ax2, xlim=[m[0], M[0]], ylim=[m[1], M[1]])
         ax2.set_xlim(m[0]-1, M[0]+1)
         ax2.set_ylim(m[1]-1, M[1]+1)
@@ -413,12 +431,14 @@ if __name__ == "__main__":
 
 
 
-        ax2.set_title("Laser Scan Data")
+        #ax2.set_title("Laser Scan Data")
         #ax2.axis('equal')
         # Plot horizontal x-axis (red line)
+        #ax2.set_facecolor('#D3D3D3')
         ax2.grid()
         #plt.show()
-        plt.savefig(out_path+image_n+".png")
+
+        plt.savefig(os.path.join(out_path, image_n+".png"))
         plt.close()
 
     # Add the rectangle patch to the axis
