@@ -2,6 +2,9 @@
 
 This repository have been build with the contribution of [sepideh-shamsizadeh](https://github.com/sepideh-shamsizadeh) and [leobarcellona](https://github.com/leobarcellona). 
 For any issues or problems, feel free to contact us. 
+
+**Our paper has been accepted at 2024 IEEE International Conference on Robotics and Automation (ICRA 2024)**
+
 # Easy Start Up
 
 Here you will find some quick startup examples. 
