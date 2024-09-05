@@ -3,7 +3,21 @@
 This repository have been build with the contribution of [sepideh-shamsizadeh](https://github.com/sepideh-shamsizadeh) and [leobarcellona](https://github.com/leobarcellona). 
 For any issues or problems, feel free to contact us. 
 
-**Our paper has been accepted at 2024 IEEE International Conference on Robotics and Automation (ICRA 2024)**
+**Our paper has been accepted at 2024 IEEE International Conference on Robotics and Automation (ICRA 2024)**. If you use this code or part of it in your research, please cite the following: 
+
+```
+@INPROCEEDINGS{10610347,
+  author={Bacchin, Alberto and Barcellona, Leonardo and Shamsizadeh, Sepideh and Olivastri, Emilio and Pretto, Alberto and Menegatti, Emanuele},
+  booktitle={2024 IEEE International Conference on Robotics and Automation (ICRA)}, 
+  title={PanNote: an Automatic Tool for Panoramic Image Annotation of People’s Positions}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={17006-17012},
+  keywords={Training;Laser radar;Navigation;Annotations;Robot vision systems;Cameras;Data models},
+  doi={10.1109/ICRA57147.2024.10610347}}
+
+```
 
 # Easy Start Up
 
